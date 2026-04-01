@@ -3,12 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA</title>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
+    <title>パン屋さんのレジ PWA - テンキー重視版</title>
     <style>
-      /* スタイルは前回のものをそのまま使用 */
       body {
         font-family: sans-serif;
         background-color: #fdf5e6;
@@ -19,19 +15,24 @@
         flex-direction: column;
       }
       h1 {
-        margin: 10px 0;
+        margin: 5px 0;
         text-align: center;
+        color: #5d4037;
+        font-size: 22px;
       }
+
       .container {
         display: flex;
         flex: 1;
         overflow: hidden;
         padding: 10px;
-        gap: 20px;
+        gap: 15px;
       }
+
+      /* 左側：商品ボタンエリア */
       .menu-wrapper {
         flex: 1;
-        max-width: 600px;
+        min-width: 320px;
         display: flex;
         flex-direction: column;
       }
@@ -39,9 +40,13 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 10px;
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 5px;
       }
+
       button {
-        padding: 15px;
+        padding: 10px;
         font-size: 16px;
         cursor: pointer;
         border-radius: 10px;
@@ -49,53 +54,144 @@
         font-weight: bold;
       }
       .item-btn {
-        background-color: #ffebcd;
-        height: 80px;
+        background-color: #fff3e0;
+        border: 2px solid #deb887;
+        height: 90px;
+        color: #5d4037;
       }
       .item-btn:active {
         background-color: #deb887;
+        transform: scale(0.95);
       }
+
+      /* 左下：操作パネル */
       .control-panel {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .main-controls {
         display: flex;
         gap: 10px;
-        margin-top: 20px;
       }
       .undo-btn {
         background-color: #f0ad4e;
         color: white;
         flex: 1;
-      }
-      .report-btn {
-        background-color: #5bc0de;
-        color: white;
-        flex: 1;
+        height: 60px;
+        border: none;
+        font-size: 18px;
       }
       .clear-btn {
         background-color: #d9534f;
         color: white;
         flex: 1;
+        height: 60px;
+        border: none;
+        font-size: 18px;
       }
+      .report-btn {
+        background-color: #5bc0de;
+        color: white;
+        height: 45px;
+        border: none;
+        font-size: 16px;
+      }
+
+      /* 右側：会計エリア（注文リストとテンキーを大きく横並びに） */
       .receipt-container {
-        width: 320px;
+        flex: 2; /* テンキーを大きくするため比率を拡大 */
         display: flex;
-        flex-direction: column;
         background: white;
         border: 2px solid #333;
         box-shadow: 5px 5px 0px #ccc;
         padding: 15px;
+        gap: 20px;
+      }
+
+      /* 注文リスト側 */
+      .receipt-left {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-right: 2px solid #eee;
+        padding-right: 15px;
+        min-width: 200px;
       }
       #item-list {
         flex: 1;
         overflow-y: auto;
         text-align: left;
+        font-size: 16px;
       }
       .total-area {
-        font-size: 24px;
+        font-size: 32px;
         font-weight: bold;
-        margin-top: 10px;
-        border-top: 2px solid #333;
+        margin-top: 5px;
+        text-align: right;
+        color: #d32f2f;
+        border-top: 3px solid #333;
+        padding-top: 5px;
+      }
+
+      /* テンキー側（サイズを大きく戻しました） */
+      .receipt-right {
+        width: 320px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+      .tenkey-container {
+        background: #f5f5f5;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+      }
+      .tenkey-display {
+        background: white;
+        border: 2px solid #999;
+        font-size: 32px;
+        padding: 5px 15px;
+        text-align: right;
+        margin-bottom: 12px;
+        height: 45px;
+        line-height: 45px;
+        font-family: monospace;
+        font-weight: bold;
+      }
+      .tenkey-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .tenkey-btn {
+        height: 65px;
+        font-size: 24px;
+        background: white;
+        border: 1px solid #bbb;
+        box-shadow: 0 3px 0 #ccc;
+      }
+      .tenkey-btn:active {
+        background: #e0e0e0;
+        box-shadow: none;
+        transform: translateY(3px);
+      }
+      .tenkey-clear {
+        background: #cfd8dc;
+      }
+
+      .change-display {
+        font-size: 30px;
+        color: #1976d2;
+        font-weight: bold;
+        text-align: right;
+        margin-top: 15px;
+        border-top: 2px dashed #ccc;
         padding-top: 10px;
       }
+
+      /* モーダル表示 */
       #report-modal {
         display: none;
         position: fixed;
@@ -107,7 +203,8 @@
         padding: 20px;
         z-index: 100;
         width: 90%;
-        max-width: 450px;
+        max-width: 500px;
+        border-radius: 15px;
       }
       .modal-overlay {
         display: none;
@@ -122,48 +219,79 @@
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
       }
       th,
       td {
         border: 1px solid #ccc;
-        padding: 8px;
+        padding: 10px;
         text-align: right;
       }
       .csv-btn {
-        background-color: #28a745;
+        background-color: #2e7d32;
         color: white;
         margin-top: 15px;
         width: 100%;
+        height: 55px;
+        border: none;
+        font-size: 18px;
       }
     </style>
   </head>
   <body>
-    <h1>🥖 パン屋さんレジアプリ 🥐</h1>
+    <h1>🥖 パン屋さんレジ PWA 🥐</h1>
 
     <div class="container">
       <div class="menu-wrapper">
         <div class="menu" id="button-container"></div>
         <div class="control-panel">
-          <button class="undo-btn" onclick="undoItem()">1つ戻す</button>
-          <button class="report-btn" onclick="showReport()">売上集計</button>
-          <button class="clear-btn" onclick="resetCalc()">会計終了/次へ</button>
+          <div class="main-controls">
+            <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
+            <button class="clear-btn" onclick="resetCalc()">会計終了</button>
+          </div>
+          <button class="report-btn" onclick="showReport()">
+            📈 本日の売上を確認
+          </button>
         </div>
       </div>
 
       <div class="receipt-container">
-        <h3>注文内容</h3>
-        <div id="item-list"></div>
-        <div class="total-area">合計: <span id="total-price">0</span>円</div>
-        <div style="margin-top: 15px">
-          お預かり:
-          <input
-            type="number"
-            id="cash"
-            oninput="calcChange()"
-            placeholder="0"
-          />円
-          <div style="font-size: 20px; color: blue; margin-top: 10px">
+        <div class="receipt-left">
+          <h3 style="margin: 0 0 10px 0; font-size: 18px">注文内容</h3>
+          <div id="item-list"></div>
+          <div class="total-area">合計: <span id="total-price">0</span>円</div>
+        </div>
+
+        <div class="receipt-right">
+          <div class="tenkey-container">
+            <div
+              style="
+                font-size: 14px;
+                color: #666;
+                font-weight: bold;
+                margin-bottom: 5px;
+              "
+            >
+              お預かり金額
+            </div>
+            <div id="cash-display" class="tenkey-display">0</div>
+            <div class="tenkey-grid">
+              <button class="tenkey-btn" onclick="pressKey('7')">7</button>
+              <button class="tenkey-btn" onclick="pressKey('8')">8</button>
+              <button class="tenkey-btn" onclick="pressKey('9')">9</button>
+              <button class="tenkey-btn" onclick="pressKey('4')">4</button>
+              <button class="tenkey-btn" onclick="pressKey('5')">5</button>
+              <button class="tenkey-btn" onclick="pressKey('6')">6</button>
+              <button class="tenkey-btn" onclick="pressKey('1')">1</button>
+              <button class="tenkey-btn" onclick="pressKey('2')">2</button>
+              <button class="tenkey-btn" onclick="pressKey('3')">3</button>
+              <button class="tenkey-btn" onclick="pressKey('0')">0</button>
+              <button class="tenkey-btn" onclick="pressKey('00')">00</button>
+              <button class="tenkey-btn tenkey-clear" onclick="pressKey('C')">
+                C
+              </button>
+            </div>
+          </div>
+          <div id="change-area" class="change-display">
             お釣り: <span id="change">0</span>円
           </div>
         </div>
@@ -172,7 +300,7 @@
 
     <div id="modal-overlay" class="modal-overlay" onclick="closeReport()"></div>
     <div id="report-modal">
-      <h2>📊 本日の売上集計</h2>
+      <h2 style="text-align: center">📊 本日の売上集計</h2>
       <table id="report-table">
         <thead>
           <tr>
@@ -183,22 +311,31 @@
         </thead>
         <tbody id="report-body"></tbody>
       </table>
-      <h3 id="report-total" style="text-align: right"></h3>
-      <button class="csv-btn" onclick="downloadCSV()">CSV保存</button>
-      <button onclick="closeReport()" style="width: 100%; margin-top: 10px">
+      <h3
+        id="report-total"
+        style="text-align: right; color: #d32f2f; margin-top: 15px"
+      ></h3>
+      <button class="csv-btn" onclick="downloadCSV()">CSVで保存する</button>
+      <button
+        onclick="closeReport()"
+        style="
+          width: 100%;
+          margin-top: 10px;
+          height: 45px;
+          border: 1px solid #ccc;
+          background: white;
+          border-radius: 10px;
+        "
+      >
         閉じる
       </button>
     </div>
 
     <script>
-      // --- オフライン対応用の命令 (Service Workerの登録) ---
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js").then(() => {
-          console.log("オフライン対応完了！");
-        });
+        navigator.serviceWorker.register("./sw.js");
       }
 
-      // --- 以下、レジのロジック (前回と同じ) ---
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "自家製酵母", price: 1200 },
@@ -209,6 +346,7 @@
       ];
 
       let total = 0;
+      let cashInput = "0";
       let history = [];
       let dailySales = {};
       products.forEach((p) => (dailySales[p.name] = { count: 0, total: 0 }));
@@ -217,23 +355,42 @@
       products.forEach((p) => {
         const btn = document.createElement("button");
         btn.className = "item-btn";
-        btn.innerHTML = `${p.name}<br>${p.price}円`;
+        btn.innerHTML = `${p.name}<br>${p.price.toLocaleString()}円`;
         btn.onclick = () => addItem(p.name, p.price);
         container.appendChild(btn);
       });
+
+      function pressKey(key) {
+        if (key === "C") {
+          cashInput = "0";
+        } else if (key === "00") {
+          if (cashInput !== "0") cashInput += "00";
+        } else {
+          if (cashInput === "0") {
+            cashInput = key;
+          } else {
+            cashInput += key;
+          }
+        }
+        if (cashInput.length > 10) cashInput = cashInput.slice(0, 10);
+        updateDisplay();
+      }
 
       function addItem(name, price) {
         total += price;
         history.push({ name: name, price: price });
         dailySales[name].count++;
         dailySales[name].total += price;
-        updateDisplay();
         const list = document.getElementById("item-list");
         const itemElement = document.createElement("div");
-        itemElement.innerText = `・${name} (${price}円)`;
+        itemElement.style.borderBottom = "1px dashed #ddd";
+        itemElement.style.padding = "5px 0";
+        itemElement.style.display = "flex";
+        itemElement.style.justifyContent = "space-between";
+        itemElement.innerHTML = `<span>・${name}</span><span>${price.toLocaleString()}円</span>`;
         list.appendChild(itemElement);
         list.scrollTop = list.scrollHeight;
-        calcChange();
+        updateDisplay();
       }
 
       function undoItem() {
@@ -242,11 +399,30 @@
           total -= lastItem.price;
           dailySales[lastItem.name].count--;
           dailySales[lastItem.name].total -= lastItem.price;
-          updateDisplay();
           document
             .getElementById("item-list")
             .removeChild(document.getElementById("item-list").lastChild);
-          calcChange();
+          updateDisplay();
+        }
+      }
+
+      function updateDisplay() {
+        document.getElementById("total-price").innerText =
+          total.toLocaleString();
+        document.getElementById("cash-display").innerText =
+          parseInt(cashInput).toLocaleString();
+        const change = parseInt(cashInput) - total;
+        document.getElementById("change").innerText =
+          change >= 0 && total > 0 ? change.toLocaleString() : 0;
+      }
+
+      function resetCalc() {
+        if (confirm("会計をクリアしますか？")) {
+          total = 0;
+          cashInput = "0";
+          history = [];
+          document.getElementById("item-list").innerHTML = "";
+          updateDisplay();
         }
       }
 
@@ -255,11 +431,11 @@
         body.innerHTML = "";
         let grandTotal = 0;
         for (const name in dailySales) {
-          body.innerHTML += `<tr><td>${name}</td><td>${dailySales[name].count}</td><td>${dailySales[name].total}円</td></tr>`;
+          body.innerHTML += `<tr><td style="text-align:left;">${name}</td><td>${dailySales[name].count}</td><td>${dailySales[name].total.toLocaleString()}円</td></tr>`;
           grandTotal += dailySales[name].total;
         }
         document.getElementById("report-total").innerText =
-          `総合計: ${grandTotal}円`;
+          `総合計: ${grandTotal.toLocaleString()}円`;
         document.getElementById("modal-overlay").style.display = "block";
         document.getElementById("report-modal").style.display = "block";
       }
@@ -276,36 +452,14 @@
           type: "text/csv;charset=utf-8;",
         });
         const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `sales.csv`);
+        link.href = URL.createObjectURL(blob);
+        link.download = `sales_${new Date().toLocaleDateString().replace(/\//g, "")}.csv`;
         link.click();
       }
 
       function closeReport() {
         document.getElementById("modal-overlay").style.display = "none";
         document.getElementById("report-modal").style.display = "none";
-      }
-
-      function updateDisplay() {
-        document.getElementById("total-price").innerText = total;
-      }
-
-      function calcChange() {
-        const cash = document.getElementById("cash").value;
-        document.getElementById("change").innerText =
-          cash >= total && total > 0 ? cash - total : 0;
-      }
-
-      function resetCalc() {
-        if (confirm("会計をクリアしますか？")) {
-          total = 0;
-          history = [];
-          updateDisplay();
-          document.getElementById("item-list").innerHTML = "";
-          document.getElementById("cash").value = "";
-          document.getElementById("change").innerText = 0;
-        }
       }
     </script>
   </body>
