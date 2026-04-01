@@ -1,4 +1,4 @@
-const CACHE_NAME = "bakery-regi-v2";
+const CACHE_NAME = "bakery-regi-v3";
 const urlsToCache = ["./", "./index.html"];
 
 // インストール時にファイルをキャッシュ（保存）する
