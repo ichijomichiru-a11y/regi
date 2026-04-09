@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - メニュー更新版</title>
+    <title>パン屋さんのレジ PWA - 個数計算版</title>
     <style>
       body {
         font-family: sans-serif;
@@ -20,7 +20,6 @@
         color: #5d4037;
         font-size: 20px;
       }
-
       .container {
         display: flex;
         flex: 1;
@@ -44,24 +43,47 @@
         overflow-y: auto;
         padding-right: 5px;
       }
-
-      button {
-        padding: 10px;
-        font-size: 15px;
-        cursor: pointer;
-        border-radius: 10px;
-        border: 1px solid #ccc;
-        font-weight: bold;
-      }
       .item-btn {
         background-color: #fff3e0;
         border: 2px solid #deb887;
         height: 85px;
         color: #5d4037;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+        border-radius: 10px;
       }
       .item-btn:active {
         background-color: #deb887;
         transform: scale(0.95);
+      }
+
+      /* 個数選択パネル */
+      .qty-panel {
+        background: #efebe9;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .qty-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 5px;
+      }
+      .qty-btn {
+        height: 40px;
+        border: 1px solid #8d6e63;
+        background: white;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .qty-btn.active {
+        background: #8d6e63;
+        color: white;
       }
 
       /* 左下：操作パネル */
@@ -82,6 +104,9 @@
         height: 55px;
         border: none;
         font-size: 18px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
       }
       .clear-btn {
         background-color: #d9534f;
@@ -90,6 +115,9 @@
         height: 55px;
         border: none;
         font-size: 18px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
       }
       .report-btn {
         background-color: #5bc0de;
@@ -97,9 +125,12 @@
         height: 40px;
         border: none;
         font-size: 15px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
       }
 
-      /* 右側：会計エリア（注文リストとテンキー） */
+      /* 右側：会計エリア */
       .receipt-container {
         flex: 2;
         display: flex;
@@ -109,7 +140,6 @@
         padding: 15px;
         gap: 20px;
       }
-
       .receipt-left {
         flex: 1;
         display: flex;
@@ -168,12 +198,14 @@
         font-size: 24px;
         background: white;
         border: 1px solid #bbb;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
         box-shadow: 0 3px 0 #ccc;
       }
       .tenkey-btn:active {
-        background: #e0e0e0;
-        box-shadow: none;
         transform: translateY(3px);
+        box-shadow: none;
       }
       .tenkey-clear {
         background: #cfd8dc;
@@ -231,6 +263,8 @@
         height: 50px;
         border: none;
         font-size: 18px;
+        border-radius: 10px;
+        cursor: pointer;
       }
     </style>
   </head>
@@ -239,7 +273,35 @@
 
     <div class="container">
       <div class="menu-wrapper">
+        <div class="qty-panel">
+          <div
+            style="
+              font-size: 13px;
+              font-weight: bold;
+              color: #5d4037;
+              margin-bottom: 5px;
+            "
+          >
+            個数を選択してからパンを押す：
+          </div>
+          <div class="qty-grid">
+            <button id="qty1" class="qty-btn active" onclick="setQty(1)">
+              ×1
+            </button>
+            <button id="qty2" class="qty-btn" onclick="setQty(2)">×2</button>
+            <button id="qty3" class="qty-btn" onclick="setQty(3)">×3</button>
+            <button id="qty4" class="qty-btn" onclick="setQty(4)">×4</button>
+            <button id="qty5" class="qty-btn" onclick="setQty(5)">×5</button>
+            <button id="qty6" class="qty-btn" onclick="setQty(6)">×6</button>
+            <button id="qty7" class="qty-btn" onclick="setQty(7)">×7</button>
+            <button id="qty8" class="qty-btn" onclick="setQty(8)">×8</button>
+            <button id="qty9" class="qty-btn" onclick="setQty(9)">×9</button>
+            <button id="qty10" class="qty-btn" onclick="setQty(10)">×10</button>
+          </div>
+        </div>
+
         <div class="menu" id="button-container"></div>
+
         <div class="control-panel">
           <div class="main-controls">
             <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
@@ -333,7 +395,6 @@
         navigator.serviceWorker.register("./sw.js");
       }
 
-      // ★ パンの種類に 1/2 サイズを追加しました
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "全粒粉 1/2", price: 700 },
@@ -349,6 +410,8 @@
       let cashInput = "0";
       let history = [];
       let dailySales = {};
+      let currentQty = 1; // ★ 現在選択されている個数
+
       products.forEach((p) => (dailySales[p.name] = { count: 0, total: 0 }));
 
       const container = document.getElementById("button-container");
@@ -359,6 +422,61 @@
         btn.onclick = () => addItem(p.name, p.price);
         container.appendChild(btn);
       });
+
+      // ★ 個数をセットする関数
+      function setQty(num) {
+        currentQty = num;
+        // ボタンの見た目（色）を変える
+        for (let i = 1; i <= 10; i++) {
+          document.getElementById("qty" + i).classList.remove("active");
+        }
+        document.getElementById("qty" + num).classList.add("active");
+      }
+
+      function addItem(name, price) {
+        const subtotal = price * currentQty;
+        total += subtotal;
+
+        // 履歴には「個数」も保存（1つ戻る時に必要）
+        history.push({ name: name, price: price, qty: currentQty });
+
+        // 売上集計に加算
+        dailySales[name].count += currentQty;
+        dailySales[name].total += subtotal;
+
+        const list = document.getElementById("item-list");
+        const itemElement = document.createElement("div");
+        itemElement.style.borderBottom = "1px dashed #ddd";
+        itemElement.style.padding = "5px 0";
+        itemElement.style.display = "flex";
+        itemElement.style.justifyContent = "space-between";
+
+        // 複数個の場合は「×10」のように表示
+        const qtyText =
+          currentQty > 1
+            ? ` <span style="color:red; font-weight:bold;">×${currentQty}</span>`
+            : "";
+        itemElement.innerHTML = `<span>・${name}${qtyText}</span><span>${subtotal.toLocaleString()}円</span>`;
+
+        list.appendChild(itemElement);
+        list.scrollTop = list.scrollHeight;
+
+        updateDisplay();
+        setQty(1); // ★ パンを押した後は個数を1に戻す
+      }
+
+      function undoItem() {
+        if (history.length > 0) {
+          const lastItem = history.pop();
+          total -= lastItem.price * lastItem.qty;
+          dailySales[lastItem.name].count -= lastItem.qty;
+          dailySales[lastItem.name].total -= lastItem.price * lastItem.qty;
+          document
+            .getElementById("item-list")
+            .removeChild(document.getElementById("item-list").lastChild);
+          updateDisplay();
+        }
+      }
 
       function pressKey(key) {
         if (key === "C") {
@@ -374,36 +492,6 @@
         }
         if (cashInput.length > 10) cashInput = cashInput.slice(0, 10);
         updateDisplay();
-      }
-
-      function addItem(name, price) {
-        total += price;
-        history.push({ name: name, price: price });
-        dailySales[name].count++;
-        dailySales[name].total += price;
-        const list = document.getElementById("item-list");
-        const itemElement = document.createElement("div");
-        itemElement.style.borderBottom = "1px dashed #ddd";
-        itemElement.style.padding = "5px 0";
-        itemElement.style.display = "flex";
-        itemElement.style.justifyContent = "space-between";
-        itemElement.innerHTML = `<span>・${name}</span><span>${price.toLocaleString()}円</span>`;
-        list.appendChild(itemElement);
-        list.scrollTop = list.scrollHeight;
-        updateDisplay();
-      }
-
-      function undoItem() {
-        if (history.length > 0) {
-          const lastItem = history.pop();
-          total -= lastItem.price;
-          dailySales[lastItem.name].count--;
-          dailySales[lastItem.name].total -= lastItem.price;
-          document
-            .getElementById("item-list")
-            .removeChild(document.getElementById("item-list").lastChild);
-          updateDisplay();
-        }
       }
 
       function updateDisplay() {
@@ -422,6 +510,7 @@
           cashInput = "0";
           history = [];
           document.getElementById("item-list").innerHTML = "";
+          setQty(1);
           updateDisplay();
         }
       }
