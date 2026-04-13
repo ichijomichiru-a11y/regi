@@ -1,24 +1,38 @@
-const CACHE_NAME = 'bakery-regi-v7'; // 以前より新しい番号にする
+const CACHE_NAME = "bakery-regi-v10"; // 番号を一気に飛ばしてv10にします
 
-const urlsToCache = [
-  './',
-  './index.html'
-];
+const urlsToCache = ["./", "./index.html"];
 
-// インストール時にファイルを保存する
-self.addEventListener('install', (event) => {
+// インストール時
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(urlsToCache);
-    })
+    }),
+  );
+  self.skipWaiting(); // 新しいSWをすぐに有効化させる
+});
+
+// ★ここが重要：古いキャッシュを削除する
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log("古いキャッシュを削除しました:", cacheName);
+            return caches.delete(cacheName);
+          }
+        }),
+      );
+    }),
   );
 });
 
-// ネットワークがない時は保存データから表示する
-self.addEventListener('fetch', (event) => {
+// 読み込み時
+self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
-    })
+    }),
   );
 });
