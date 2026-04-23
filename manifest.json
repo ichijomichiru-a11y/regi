@@ -1,0 +1,15 @@
+{
+  "name": "パン屋さんのレジ",
+  "short_name": "パンレジ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fdf5e6",
+  "theme_color": "#5d4037",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/422/422201.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
