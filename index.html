@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - 個数計算版</title>
+    <title>パン屋さんのレジ PWA - メニュー追加版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       body {
@@ -274,6 +274,7 @@
 
     <div class="container">
       <div class="menu-wrapper">
+        <!-- 個数選択パネル -->
         <div class="qty-panel">
           <div
             style="
@@ -306,7 +307,9 @@
         <div class="control-panel">
           <div class="main-controls">
             <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
-            <button class="clear-btn" onclick="resetCalc()">会計終了</button>
+            <button class="clear-btn" onclick="resetCalcManual()">
+              会計確定・クリア
+            </button>
           </div>
           <button class="report-btn" onclick="showReport()">
             📈 本日の売上を確認
@@ -396,6 +399,7 @@
         navigator.serviceWorker.register("./sw.js");
       }
 
+      // ★ 新しいパン「うずまき」「アーモンドクリーム」を末尾に追加しました
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "全粒粉 1/2", price: 700 },
@@ -405,13 +409,15 @@
         { name: "山食", price: 600 },
         { name: "クロワッサン", price: 280 },
         { name: "スコーン", price: 250 },
+        { name: "うずまき", price: 350 },
+        { name: "アーモンドクリーム", price: 380 },
       ];
 
       let total = 0;
       let cashInput = "0";
-      let history = [];
+      let currentQty = 1;
+      let currentOrder = [];
       let dailySales = {};
-      let currentQty = 1; // ★ 現在選択されている個数
 
       products.forEach((p) => (dailySales[p.name] = { count: 0, total: 0 }));
 
@@ -424,10 +430,8 @@
         container.appendChild(btn);
       });
 
-      // ★ 個数をセットする関数
       function setQty(num) {
         currentQty = num;
-        // ボタンの見た目（色）を変える
         for (let i = 1; i <= 10; i++) {
           document.getElementById("qty" + i).classList.remove("active");
         }
@@ -435,47 +439,72 @@
       }
 
       function addItem(name, price) {
+        if (parseInt(cashInput) > 0 && currentOrder.length > 0) {
+          autoCommitOrder();
+        }
+
         const subtotal = price * currentQty;
         total += subtotal;
+        currentOrder.push({ name: name, price: price, qty: currentQty });
 
-        // 履歴には「個数」も保存（1つ戻る時に必要）
-        history.push({ name: name, price: price, qty: currentQty });
-
-        // 売上集計に加算
-        dailySales[name].count += currentQty;
-        dailySales[name].total += subtotal;
-
-        const list = document.getElementById("item-list");
-        const itemElement = document.createElement("div");
-        itemElement.style.borderBottom = "1px dashed #ddd";
-        itemElement.style.padding = "5px 0";
-        itemElement.style.display = "flex";
-        itemElement.style.justifyContent = "space-between";
-
-        // 複数個の場合は「×10」のように表示
-        const qtyText =
-          currentQty > 1
-            ? ` <span style="color:red; font-weight:bold;">×${currentQty}</span>`
-            : "";
-        itemElement.innerHTML = `<span>・${name}${qtyText}</span><span>${subtotal.toLocaleString()}円</span>`;
-
-        list.appendChild(itemElement);
-        list.scrollTop = list.scrollHeight;
-
+        renderItemList();
         updateDisplay();
-        setQty(1); // ★ パンを押した後は個数を1に戻す
+        setQty(1);
+      }
+
+      function autoCommitOrder() {
+        currentOrder.forEach((item) => {
+          dailySales[item.name].count += item.qty;
+          dailySales[item.name].total += item.price * item.qty;
+        });
+        total = 0;
+        cashInput = "0";
+        currentOrder = [];
+        document.getElementById("item-list").innerHTML = "";
+      }
+
+      function renderItemList() {
+        const list = document.getElementById("item-list");
+        list.innerHTML = "";
+        currentOrder.forEach((item) => {
+          const itemElement = document.createElement("div");
+          itemElement.style.borderBottom = "1px dashed #ddd";
+          itemElement.style.padding = "5px 0";
+          itemElement.style.display = "flex";
+          itemElement.style.justifyContent = "space-between";
+
+          const qtyText =
+            item.qty > 1
+              ? ` <span style="color:red; font-weight:bold;">×${item.qty}</span>`
+              : "";
+          const itemSubtotal = item.price * item.qty;
+          itemElement.innerHTML = `<span>・${item.name}${qtyText}</span><span>${itemSubtotal.toLocaleString()}円</span>`;
+          list.appendChild(itemElement);
+        });
+        list.scrollTop = list.scrollHeight;
       }
 
       function undoItem() {
-        if (history.length > 0) {
-          const lastItem = history.pop();
+        if (currentOrder.length > 0) {
+          const lastItem = currentOrder.pop();
           total -= lastItem.price * lastItem.qty;
-          dailySales[lastItem.name].count -= lastItem.qty;
-          dailySales[lastItem.name].total -= lastItem.price * lastItem.qty;
-          document
-            .getElementById("item-list")
-            .removeChild(document.getElementById("item-list").lastChild);
+          renderItemList();
           updateDisplay();
+        }
+      }
+
+      // 手動で会計を確定・クリアする処理
+      function resetCalcManual() {
+        if (currentOrder.length === 0) {
+          cashInput = "0";
+          updateDisplay();
+          return;
+        }
+
+        if (confirm("現在のお会計を確定して画面をクリアしますか？")) {
+          autoCommitOrder();
+          updateDisplay();
+          setQty(1);
         }
       }
 
@@ -503,17 +532,6 @@
         const change = parseInt(cashInput) - total;
         document.getElementById("change").innerText =
           change >= 0 && total > 0 ? change.toLocaleString() : 0;
-      }
-
-      function resetCalc() {
-        if (confirm("会計をクリアしますか？")) {
-          total = 0;
-          cashInput = "0";
-          history = [];
-          document.getElementById("item-list").innerHTML = "";
-          setQty(1);
-          updateDisplay();
-        }
       }
 
       function showReport() {
