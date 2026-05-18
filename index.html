@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - メニュー追加版</title>
+    <title>パン屋さんのレジ PWA - 価格変更版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       body {
@@ -274,7 +274,6 @@
 
     <div class="container">
       <div class="menu-wrapper">
-        <!-- 個数選択パネル -->
         <div class="qty-panel">
           <div
             style="
@@ -399,7 +398,7 @@
         navigator.serviceWorker.register("./sw.js");
       }
 
-      // ★ 新しいパン「うずまき」「アーモンドクリーム」を末尾に追加しました
+      // ★ アーモンドクリームの価格を 400 に変更しました
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "全粒粉 1/2", price: 700 },
@@ -493,7 +492,6 @@
         }
       }
 
-      // 手動で会計を確定・クリアする処理
       function resetCalcManual() {
         if (currentOrder.length === 0) {
           cashInput = "0";
