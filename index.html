@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - 価格変更版</title>
+    <title>パン屋さんのレジ PWA - データ保存版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       body {
@@ -267,6 +267,17 @@
         border-radius: 10px;
         cursor: pointer;
       }
+      .reset-sales-btn {
+        background-color: #d9534f;
+        color: white;
+        margin-top: 10px;
+        width: 100%;
+        height: 40px;
+        border: none;
+        font-size: 16px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -274,6 +285,7 @@
 
     <div class="container">
       <div class="menu-wrapper">
+        <!-- 個数選択パネル -->
         <div class="qty-panel">
           <div
             style="
@@ -378,6 +390,10 @@
         style="text-align: right; color: #d32f2f; margin-top: 15px"
       ></h3>
       <button class="csv-btn" onclick="downloadCSV()">CSVで保存する</button>
+      <!-- ★ データリセットボタンを追加しました -->
+      <button class="reset-sales-btn" onclick="clearSalesData()">
+        ⚠️ 売上データをゼロにリセットする
+      </button>
       <button
         onclick="closeReport()"
         style="
@@ -398,7 +414,6 @@
         navigator.serviceWorker.register("./sw.js");
       }
 
-      // ★ アーモンドクリームの価格を 400 に変更しました
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "全粒粉 1/2", price: 700 },
@@ -418,7 +433,21 @@
       let currentOrder = [];
       let dailySales = {};
 
+      // 1. 商品リストをベースに、初期データをセットします
       products.forEach((p) => (dailySales[p.name] = { count: 0, total: 0 }));
+
+      // ★ 2. タブレット本体（LocalStorage）に保存された売上データがあれば、読み込んで復元します
+      const savedSales = localStorage.getItem("bakerySalesData");
+      if (savedSales) {
+        const parsedSales = JSON.parse(savedSales);
+        // 保存されているデータのうち、現在のメニューにあるものだけを復元
+        for (const name in parsedSales) {
+          if (dailySales[name]) {
+            dailySales[name].count = parsedSales[name].count;
+            dailySales[name].total = parsedSales[name].total;
+          }
+        }
+      }
 
       const container = document.getElementById("button-container");
       products.forEach((p) => {
@@ -456,6 +485,10 @@
           dailySales[item.name].count += item.qty;
           dailySales[item.name].total += item.price * item.qty;
         });
+
+        // ★ 売上が確定した瞬間に、タブレット本体へデータを自動セーブします
+        localStorage.setItem("bakerySalesData", JSON.stringify(dailySales));
+
         total = 0;
         cashInput = "0";
         currentOrder = [];
@@ -561,6 +594,25 @@
         link.href = URL.createObjectURL(blob);
         link.download = `sales_${new Date().toLocaleDateString().replace(/\//g, "")}.csv`;
         link.click();
+      }
+
+      // ★ 売上データをゼロにリセットする処理
+      function clearSalesData() {
+        if (
+          confirm(
+            "本当に本日の売上データをすべてゼロにしますか？\n（CSV保存をしてから実行してください）",
+          )
+        ) {
+          // 売上データを初期化
+          products.forEach(
+            (p) => (dailySales[p.name] = { count: 0, total: 0 }),
+          );
+          // 保存されているデータを削除
+          localStorage.removeItem("bakerySalesData");
+
+          alert("売上データをリセットしました。明日の営業の準備が整いました。");
+          closeReport();
+        }
       }
 
       function closeReport() {
