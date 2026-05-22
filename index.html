@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - データ保存版</title>
+    <title>パン屋さんのレジ PWA - 3列レイアウト版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       body {
@@ -30,15 +30,17 @@
       }
 
       /* 左側：商品ボタンエリア */
+      /* ★ メニューエリアの割合を増やして広くしました */
       .menu-wrapper {
-        flex: 1;
+        flex: 1.2;
         min-width: 320px;
         display: flex;
         flex-direction: column;
       }
+      /* ★ 常に3列（repeat(3, 1fr)）に並ぶように変更しました */
       .menu {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 8px;
         flex: 1;
         overflow-y: auto;
@@ -132,8 +134,9 @@
       }
 
       /* 右側：会計エリア */
+      /* ★ 会計エリアの割合を調整して、少し細くしました */
       .receipt-container {
-        flex: 2;
+        flex: 1.5;
         display: flex;
         background: white;
         border: 2px solid #333;
@@ -413,7 +416,6 @@
         navigator.serviceWorker.register("./sw.js");
       }
 
-      // ★ ここに「ホワイトソースパン」を追加しました
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "全粒粉 1/2", price: 700 },
@@ -434,14 +436,11 @@
       let currentOrder = [];
       let dailySales = {};
 
-      // 1. 商品リストをベースに、初期データをセットします
       products.forEach((p) => (dailySales[p.name] = { count: 0, total: 0 }));
 
-      // 2. タブレット本体（LocalStorage）に保存された売上データがあれば、読み込んで復元します
       const savedSales = localStorage.getItem("bakerySalesData");
       if (savedSales) {
         const parsedSales = JSON.parse(savedSales);
-        // 保存されているデータのうち、現在のメニューにあるものだけを復元
         for (const name in parsedSales) {
           if (dailySales[name]) {
             dailySales[name].count = parsedSales[name].count;
@@ -487,7 +486,6 @@
           dailySales[item.name].total += item.price * item.qty;
         });
 
-        // 売上が確定した瞬間に、タブレット本体へデータを自動セーブします
         localStorage.setItem("bakerySalesData", JSON.stringify(dailySales));
 
         total = 0;
@@ -597,7 +595,6 @@
         link.click();
       }
 
-      // 売上データをゼロにリセットする処理
       function clearSalesData() {
         if (
           confirm(
