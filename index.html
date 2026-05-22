@@ -390,7 +390,6 @@
         style="text-align: right; color: #d32f2f; margin-top: 15px"
       ></h3>
       <button class="csv-btn" onclick="downloadCSV()">CSVで保存する</button>
-      <!-- ★ データリセットボタンを追加しました -->
       <button class="reset-sales-btn" onclick="clearSalesData()">
         ⚠️ 売上データをゼロにリセットする
       </button>
@@ -414,6 +413,7 @@
         navigator.serviceWorker.register("./sw.js");
       }
 
+      // ★ ここに「ホワイトソースパン」を追加しました
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "全粒粉 1/2", price: 700 },
@@ -425,6 +425,7 @@
         { name: "スコーン", price: 250 },
         { name: "うずまき", price: 350 },
         { name: "アーモンドクリーム", price: 400 },
+        { name: "ホワイトソースパン", price: 450 },
       ];
 
       let total = 0;
@@ -436,7 +437,7 @@
       // 1. 商品リストをベースに、初期データをセットします
       products.forEach((p) => (dailySales[p.name] = { count: 0, total: 0 }));
 
-      // ★ 2. タブレット本体（LocalStorage）に保存された売上データがあれば、読み込んで復元します
+      // 2. タブレット本体（LocalStorage）に保存された売上データがあれば、読み込んで復元します
       const savedSales = localStorage.getItem("bakerySalesData");
       if (savedSales) {
         const parsedSales = JSON.parse(savedSales);
@@ -486,7 +487,7 @@
           dailySales[item.name].total += item.price * item.qty;
         });
 
-        // ★ 売上が確定した瞬間に、タブレット本体へデータを自動セーブします
+        // 売上が確定した瞬間に、タブレット本体へデータを自動セーブします
         localStorage.setItem("bakerySalesData", JSON.stringify(dailySales));
 
         total = 0;
@@ -596,18 +597,16 @@
         link.click();
       }
 
-      // ★ 売上データをゼロにリセットする処理
+      // 売上データをゼロにリセットする処理
       function clearSalesData() {
         if (
           confirm(
             "本当に本日の売上データをすべてゼロにしますか？\n（CSV保存をしてから実行してください）",
           )
         ) {
-          // 売上データを初期化
           products.forEach(
             (p) => (dailySales[p.name] = { count: 0, total: 0 }),
           );
-          // 保存されているデータを削除
           localStorage.removeItem("bakerySalesData");
 
           alert("売上データをリセットしました。明日の営業の準備が整いました。");
