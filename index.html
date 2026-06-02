@@ -30,14 +30,12 @@
       }
 
       /* 左側：商品ボタンエリア */
-      /* ★ メニューエリアの割合を増やして広くしました */
       .menu-wrapper {
         flex: 1.2;
         min-width: 320px;
         display: flex;
         flex-direction: column;
       }
-      /* ★ 常に3列（repeat(3, 1fr)）に並ぶように変更しました */
       .menu {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -134,7 +132,6 @@
       }
 
       /* 右側：会計エリア */
-      /* ★ 会計エリアの割合を調整して、少し細くしました */
       .receipt-container {
         flex: 1.5;
         display: flex;
@@ -288,7 +285,6 @@
 
     <div class="container">
       <div class="menu-wrapper">
-        <!-- 個数選択パネル -->
         <div class="qty-panel">
           <div
             style="
@@ -416,18 +412,20 @@
         navigator.serviceWorker.register("./sw.js");
       }
 
+      // ★ ご要望の通り、種類とサイズの並び順を調整し、「コーンマヨ」を追加しました
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "全粒粉 1/2", price: 700 },
+        { name: "長いパン", price: 350 },
         { name: "自家製酵母", price: 1200 },
         { name: "自家製酵母 1/2", price: 600 },
-        { name: "長いパン", price: 350 },
         { name: "山食", price: 600 },
         { name: "クロワッサン", price: 280 },
         { name: "スコーン", price: 250 },
         { name: "うずまき", price: 350 },
         { name: "アーモンドクリーム", price: 400 },
         { name: "ホワイトソースパン", price: 450 },
+        { name: "コーンマヨ", price: 380 },
       ];
 
       let total = 0;
