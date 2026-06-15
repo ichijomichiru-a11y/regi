@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - 3列レイアウト版</title>
+    <title>パン屋さんのレジ PWA - レシート印刷版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       body {
@@ -96,7 +96,7 @@
       }
       .main-controls {
         display: flex;
-        gap: 10px;
+        gap: 8px;
       }
       .undo-btn {
         background-color: #f0ad4e;
@@ -104,7 +104,19 @@
         flex: 1;
         height: 55px;
         border: none;
-        font-size: 18px;
+        font-size: 16px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      /* ★ 印刷ボタンを追加 */
+      .print-btn {
+        background-color: #4caf50;
+        color: white;
+        flex: 1.2;
+        height: 55px;
+        border: none;
+        font-size: 16px;
         border-radius: 10px;
         font-weight: bold;
         cursor: pointer;
@@ -115,7 +127,7 @@
         flex: 1;
         height: 55px;
         border: none;
-        font-size: 18px;
+        font-size: 16px;
         border-radius: 10px;
         font-weight: bold;
         cursor: pointer;
@@ -317,8 +329,11 @@
         <div class="control-panel">
           <div class="main-controls">
             <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
+            <button class="print-btn" onclick="printReceipt()">
+              🧾 レシート
+            </button>
             <button class="clear-btn" onclick="resetCalcManual()">
-              会計確定・クリア
+              会計確定
             </button>
           </div>
           <button class="report-btn" onclick="showReport()">
@@ -412,7 +427,6 @@
         navigator.serviceWorker.register("./sw.js");
       }
 
-      // ★ ご要望の通り、種類とサイズの並び順を調整し、「コーンマヨ」を追加しました
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "全粒粉 1/2", price: 700 },
@@ -468,11 +482,9 @@
         if (parseInt(cashInput) > 0 && currentOrder.length > 0) {
           autoCommitOrder();
         }
-
         const subtotal = price * currentQty;
         total += subtotal;
         currentOrder.push({ name: name, price: price, qty: currentQty });
-
         renderItemList();
         updateDisplay();
         setQty(1);
@@ -483,9 +495,7 @@
           dailySales[item.name].count += item.qty;
           dailySales[item.name].total += item.price * item.qty;
         });
-
         localStorage.setItem("bakerySalesData", JSON.stringify(dailySales));
-
         total = 0;
         cashInput = "0";
         currentOrder = [];
@@ -501,7 +511,6 @@
           itemElement.style.padding = "5px 0";
           itemElement.style.display = "flex";
           itemElement.style.justifyContent = "space-between";
-
           const qtyText =
             item.qty > 1
               ? ` <span style="color:red; font-weight:bold;">×${item.qty}</span>`
@@ -528,12 +537,50 @@
           updateDisplay();
           return;
         }
-
         if (confirm("現在のお会計を確定して画面をクリアしますか？")) {
           autoCommitOrder();
           updateDisplay();
           setQty(1);
         }
+      }
+
+      // ★ レシート印刷機能の追加
+      function printReceipt() {
+        if (currentOrder.length === 0) {
+          alert("印刷する注文がありません。");
+          return;
+        }
+
+        // 1. レシートのテキストデータを組み立てる
+        let receiptText = "🍞 パン屋さん 🍞\n";
+        receiptText += "--------------------------\n";
+
+        currentOrder.forEach((item) => {
+          let line = `${item.name}`;
+          if (item.qty > 1) {
+            line += ` x${item.qty}`;
+          }
+          line += `  ${item.price * item.qty}円\n`;
+          receiptText += line;
+        });
+
+        receiptText += "--------------------------\n";
+        receiptText += `合計: ${total}円\n`;
+        receiptText += `お預かり: ${parseInt(cashInput)}円\n`;
+
+        const change = parseInt(cashInput) - total;
+        receiptText += `お釣り: ${change >= 0 ? change : 0}円\n`;
+        receiptText += "--------------------------\n";
+        receiptText += "ありがとうございました！\n\n\n\n"; // 紙を切りやすくするために余白（改行）を追加
+
+        // 2. RawBTにデータを送信する（これが魔法のコードです）
+        const base64Data = btoa(unescape(encodeURIComponent(receiptText)));
+        window.location.href = "rawbt:base64," + base64Data;
+
+        // 3. 印刷後、自動的に売上を確定して画面をリセット
+        autoCommitOrder();
+        updateDisplay();
+        setQty(1);
       }
 
       function pressKey(key) {
@@ -603,7 +650,6 @@
             (p) => (dailySales[p.name] = { count: 0, total: 0 }),
           );
           localStorage.removeItem("bakerySalesData");
-
           alert("売上データをリセットしました。明日の営業の準備が整いました。");
           closeReport();
         }
