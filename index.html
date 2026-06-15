@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pan pequeño レジ PWA</title>
+    <title>pan pequeño レジ PWA - 右手特化レイアウト</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       /* 普段の画面用（印刷エリアは隠しておく） */
@@ -342,7 +342,6 @@
           text-align: center;
         }
 
-        /* ★ タイトルとサブタイトルを「normal（普通の太さ）」に変更しました */
         .p-title {
           font-size: 22px;
           font-weight: normal;
@@ -361,7 +360,6 @@
           font-weight: bold;
         }
 
-        /* ★ 新しく「thank you!」用の筆記体デザインを追加しました */
         .p-thanks {
           font-size: 16px;
           text-align: center;
@@ -377,6 +375,49 @@
     <h1>🥖 pan pequeño (ぺけぱん) レジ 🥐</h1>
 
     <div class="container">
+      <div class="receipt-container">
+        <div class="receipt-left">
+          <h3 style="margin: 0 0 10px 0; font-size: 18px">注文内容</h3>
+          <div id="item-list"></div>
+          <div class="total-area">合計: <span id="total-price">0</span>円</div>
+        </div>
+
+        <div class="receipt-right">
+          <div class="tenkey-container">
+            <div
+              style="
+                font-size: 14px;
+                color: #666;
+                font-weight: bold;
+                margin-bottom: 5px;
+              "
+            >
+              お預かり金額
+            </div>
+            <div id="cash-display" class="tenkey-display">0</div>
+            <div class="tenkey-grid">
+              <button class="tenkey-btn" onclick="pressKey('7')">7</button>
+              <button class="tenkey-btn" onclick="pressKey('8')">8</button>
+              <button class="tenkey-btn" onclick="pressKey('9')">9</button>
+              <button class="tenkey-btn" onclick="pressKey('4')">4</button>
+              <button class="tenkey-btn" onclick="pressKey('5')">5</button>
+              <button class="tenkey-btn" onclick="pressKey('6')">6</button>
+              <button class="tenkey-btn" onclick="pressKey('1')">1</button>
+              <button class="tenkey-btn" onclick="pressKey('2')">2</button>
+              <button class="tenkey-btn" onclick="pressKey('3')">3</button>
+              <button class="tenkey-btn" onclick="pressKey('0')">0</button>
+              <button class="tenkey-btn" onclick="pressKey('00')">00</button>
+              <button class="tenkey-btn tenkey-clear" onclick="pressKey('C')">
+                C
+              </button>
+            </div>
+          </div>
+          <div id="change-area" class="change-display">
+            お釣り: <span id="change">0</span>円
+          </div>
+        </div>
+      </div>
+
       <div class="menu-wrapper">
         <div class="qty-panel">
           <div
@@ -420,49 +461,6 @@
           <button class="report-btn" onclick="showReport()">
             📈 本日の売上を確認
           </button>
-        </div>
-      </div>
-
-      <div class="receipt-container">
-        <div class="receipt-left">
-          <h3 style="margin: 0 0 10px 0; font-size: 18px">注文内容</h3>
-          <div id="item-list"></div>
-          <div class="total-area">合計: <span id="total-price">0</span>円</div>
-        </div>
-
-        <div class="receipt-right">
-          <div class="tenkey-container">
-            <div
-              style="
-                font-size: 14px;
-                color: #666;
-                font-weight: bold;
-                margin-bottom: 5px;
-              "
-            >
-              お預かり金額
-            </div>
-            <div id="cash-display" class="tenkey-display">0</div>
-            <div class="tenkey-grid">
-              <button class="tenkey-btn" onclick="pressKey('7')">7</button>
-              <button class="tenkey-btn" onclick="pressKey('8')">8</button>
-              <button class="tenkey-btn" onclick="pressKey('9')">9</button>
-              <button class="tenkey-btn" onclick="pressKey('4')">4</button>
-              <button class="tenkey-btn" onclick="pressKey('5')">5</button>
-              <button class="tenkey-btn" onclick="pressKey('6')">6</button>
-              <button class="tenkey-btn" onclick="pressKey('1')">1</button>
-              <button class="tenkey-btn" onclick="pressKey('2')">2</button>
-              <button class="tenkey-btn" onclick="pressKey('3')">3</button>
-              <button class="tenkey-btn" onclick="pressKey('0')">0</button>
-              <button class="tenkey-btn" onclick="pressKey('00')">00</button>
-              <button class="tenkey-btn tenkey-clear" onclick="pressKey('C')">
-                C
-              </button>
-            </div>
-          </div>
-          <div id="change-area" class="change-display">
-            お釣り: <span id="change">0</span>円
-          </div>
         </div>
       </div>
     </div>
@@ -633,7 +631,6 @@
 
         const printSection = document.getElementById("print-section");
 
-        // ★ 文字を小文字の「pan pequeño」に変更しました
         let html = "<div class='p-title'>pan pequeño</div>";
         html += "<div class='p-subtitle'>- ぺけぱん -</div>";
         html += "<div class='p-line'></div>";
@@ -654,10 +651,7 @@
         html += `<div class='p-right'>お釣り: ${change >= 0 ? change : 0}円</div>`;
         html += "<div class='p-line'></div>";
 
-        // ★ クラスを「p-thanks」に変更し、筆記体の「thank you!」にしました
         html += "<div class='p-thanks'>thank you!</div>";
-
-        // 5mm程度の余白
         html += "<div style='height: 40px;'></div>";
 
         printSection.innerHTML = html;
