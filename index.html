@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - 標準印刷版</title>
+    <title>パン屋さんのレジ PWA - 印刷文字サイズ大</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       /* 普段の画面用（印刷エリアは隠しておく） */
@@ -292,8 +292,12 @@
         }
       }
 
-      /* ★ 印刷用（印刷する時だけレジ画面を消し、58mm幅のレシートだけを表示する） */
+      /* ★ 印刷用のデザイン（文字を大幅に大きくしました） */
       @media print {
+        @page {
+          margin: 0;
+          size: 58mm auto;
+        } /* 用紙サイズをプリンターに伝える */
         body * {
           visibility: hidden;
         }
@@ -305,22 +309,23 @@
           position: absolute;
           left: 0;
           top: 0;
-          width: 48mm; /* 58mm用紙に収まる幅に設定 */
+          width: 52mm; /* はみ出さないように少し余裕を持たせる */
           margin: 0;
-          padding: 0;
+          padding: 10px 0;
           font-family: sans-serif;
           color: black;
-          font-size: 12px; /* レシート用サイズ */
+          font-size: 26px; /* ★ 文字の基本サイズを12pxから26pxに拡大 */
+          line-height: 1.3;
         }
         .p-item {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 2px;
+          margin-bottom: 5px;
         }
         .p-line {
-          border-top: 1px dashed black;
-          margin: 5px 0;
-        }
+          border-top: 2px dashed black;
+          margin: 10px 0;
+        } /* ★ 点線を太く */
         .p-bold {
           font-weight: bold;
         }
@@ -331,11 +336,11 @@
           text-align: center;
         }
         .p-title {
-          font-size: 16px;
+          font-size: 34px;
           font-weight: bold;
           text-align: center;
-          margin-bottom: 10px;
-        }
+          margin-bottom: 15px;
+        } /* ★ タイトルをさらに大きく */
       }
     </style>
   </head>
@@ -378,11 +383,9 @@
         <div class="control-panel">
           <div class="main-controls">
             <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
-
             <button class="print-btn" onclick="printReceipt()">
               🧾 レシート
             </button>
-
             <button class="clear-btn" onclick="resetCalcManual()">
               会計確定
             </button>
@@ -595,7 +598,6 @@
         }
       }
 
-      // ★ 新機能：ブラウザの「標準印刷」を呼び出す
       function printReceipt() {
         if (currentOrder.length === 0) {
           alert("印刷する注文がありません。");
@@ -604,7 +606,6 @@
 
         const printSection = document.getElementById("print-section");
 
-        // 印刷用のレイアウトを作る
         let html = "<div class='p-title'>🍞 パン屋さん 🍞</div>";
         html += "<div class='p-line'></div>";
 
@@ -617,21 +618,19 @@
         });
 
         html += "<div class='p-line'></div>";
-        html += `<div class='p-right p-bold' style='font-size:16px;'>合計: ${total}円</div>`;
+        html += `<div class='p-right p-bold' style='font-size:28px;'>合計: ${total}円</div>`;
         html += `<div class='p-right'>お預かり: ${parseInt(cashInput)}円</div>`;
 
         const change = parseInt(cashInput) - total;
         html += `<div class='p-right'>お釣り: ${change >= 0 ? change : 0}円</div>`;
         html += "<div class='p-line'></div>";
         html += "<div class='p-center'>ありがとうございました！</div>";
-        html += "<br><br><br>"; // 紙を切るための余白
+        html += "<br><br><br>";
 
         printSection.innerHTML = html;
 
-        // ブラウザの印刷ダイアログを呼び出す！
         window.print();
 
-        // 印刷が終わった（またはキャンセルした）後、少し待ってから画面をクリア
         setTimeout(() => {
           autoCommitOrder();
           updateDisplay();
