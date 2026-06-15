@@ -545,44 +545,61 @@
       }
 
       // ★ レシート印刷機能の追加
+      // ★ レシート印刷機能（文字化け防止 ＆ デザイン向上版）
       function printReceipt() {
         if (currentOrder.length === 0) {
           alert("印刷する注文がありません。");
           return;
         }
 
-        // 1. レシートのテキストデータを組み立てる
-        let receiptText = "🍞 パン屋さん 🍞\n";
-        receiptText += "--------------------------\n";
+        // 1. HTML形式でレシートの綺麗なデザインを組み立てる
+        // これにより、文字化けを完全に防ぎ、文字を中央に寄せたりできます
+        let html =
+          "<div style='width: 100%; font-family: sans-serif; color: black; font-size: 24px;'>";
 
+        // お店の名前（中央揃え）
+        html +=
+          "<h2 style='text-align: center; margin: 0 0 10px 0;'>🍞 パン屋さん 🍞</h2>";
+        html += "<hr style='border: 1px dashed black; margin-bottom: 10px;' />";
+
+        // 注文した商品のリスト
         currentOrder.forEach((item) => {
-          let line = `${item.name}`;
-          if (item.qty > 1) {
-            line += ` x${item.qty}`;
-          }
-          line += `  ${item.price * item.qty}円\n`;
-          receiptText += line;
+          let qtyText =
+            item.qty > 1
+              ? ` <span style='font-weight:bold;'>x${item.qty}</span>`
+              : "";
+          html += `<div style='display: flex; justify-content: space-between; margin-bottom: 5px;'>
+                            <span>${item.name}${qtyText}</span>
+                            <span>${item.price * item.qty}円</span>
+                         </div>`;
         });
 
-        receiptText += "--------------------------\n";
-        receiptText += `合計: ${total}円\n`;
-        receiptText += `お預かり: ${parseInt(cashInput)}円\n`;
+        html += "<hr style='border: 1px dashed black; margin: 10px 0;' />";
+
+        // 合計金額とお釣り（右寄せで太字）
+        html += `<div style='text-align: right; font-weight: bold; font-size: 28px;'>合計: ${total}円</div>`;
+        html += `<div style='text-align: right; margin-top: 5px;'>お預かり: ${parseInt(cashInput)}円</div>`;
 
         const change = parseInt(cashInput) - total;
-        receiptText += `お釣り: ${change >= 0 ? change : 0}円\n`;
-        receiptText += "--------------------------\n";
-        receiptText += "ありがとうございました！\n\n\n\n"; // 紙を切りやすくするために余白（改行）を追加
+        html += `<div style='text-align: right;'>お釣り: ${change >= 0 ? change : 0}円</div>`;
 
-        // 2. RawBTにデータを送信する（これが魔法のコードです）
-        const base64Data = btoa(unescape(encodeURIComponent(receiptText)));
-        window.location.href = "rawbt:base64," + base64Data;
+        html += "<hr style='border: 1px dashed black; margin: 10px 0;' />";
+
+        // 感謝のメッセージ（中央揃え）
+        html +=
+          "<div style='text-align: center; margin-top: 10px;'>ありがとうございました！</div>";
+        html += "</div>";
+
+        // 2. RawBTに「HTMLの画像データ」として送信する
+        // 宛先を「rawbt:data:text/html;base64,」に変更しています
+        const base64Data = btoa(unescape(encodeURIComponent(html)));
+        window.location.href = "rawbt:data:text/html;base64," + base64Data;
 
         // 3. 印刷後、自動的に売上を確定して画面をリセット
         autoCommitOrder();
         updateDisplay();
         setQty(1);
       }
-
       function pressKey(key) {
         if (key === "C") {
           cashInput = "0";
