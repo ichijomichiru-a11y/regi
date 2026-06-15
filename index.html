@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - 直通リンク印刷版</title>
+    <title>パン屋さんのレジ PWA - 最終突破版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       body {
@@ -107,7 +107,7 @@
         cursor: pointer;
       }
 
-      /* ★ 印刷ボタン（リンク）のデザイン */
+      /* 印刷ボタンのデザイン */
       .print-btn {
         background-color: #4caf50;
         color: white;
@@ -218,9 +218,11 @@
         cursor: pointer;
         box-shadow: 0 3px 0 #ccc;
       }
+      .print-btn:active,
+      .clear-btn:active,
+      .undo-btn:active,
       .tenkey-btn:active {
-        transform: translateY(3px);
-        box-shadow: none;
+        transform: scale(0.98);
       }
       .tenkey-clear {
         background: #cfd8dc;
@@ -337,6 +339,7 @@
               id="print-btn"
               class="print-btn"
               onclick="handlePrintClick(event)"
+              target="_blank"
               >🧾 レシート</a
             >
 
@@ -508,7 +511,7 @@
         cashInput = "0";
         currentOrder = [];
         document.getElementById("item-list").innerHTML = "";
-        updateReceiptUrl(); // カゴが空になったのでリンクも空にする
+        updateReceiptUrl();
       }
 
       function renderItemList() {
@@ -553,7 +556,7 @@
         }
       }
 
-      // ★ 新機能：画面が更新されるたびに「印刷用データ」をボタン（リンク）にセットしておく
+      // ★ 最新：HTML（日本語画像化データ）を最も強力な Android Intent 形式でセットする
       function updateReceiptUrl() {
         const printBtn = document.getElementById("print-btn");
         if (currentOrder.length === 0) {
@@ -590,19 +593,22 @@
         html += "</div>";
 
         const base64Data = btoa(unescape(encodeURIComponent(html)));
-        // ユーザーがタップした瞬間、RawBTにこのHTMLデータを渡して起動させる
-        printBtn.href = "rawbt:data:text/html;base64," + base64Data;
+
+        // Androidの壁を最も突破しやすい「Intent」形式 ＋ scheme=rawbt の組み合わせ
+        printBtn.href =
+          "intent:data:text/html;base64," +
+          base64Data +
+          "#Intent;scheme=rawbt;end;";
       }
 
-      // ★ レシートボタンがタップされた時の処理
       function handlePrintClick(event) {
         if (currentOrder.length === 0) {
           alert("印刷する注文がありません。");
-          event.preventDefault(); // 何もしない
+          event.preventDefault();
           return;
         }
 
-        // RawBTへのジャンプ（リンク）は許可しつつ、1秒後に画面をリセットする
+        // 印刷処理へ飛んだあと、1秒後にレジ画面を自動クリア
         setTimeout(() => {
           autoCommitOrder();
           updateDisplay();
@@ -634,10 +640,12 @@
         const change = parseInt(cashInput) - total;
         document.getElementById("change").innerText =
           change >= 0 && total > 0 ? change.toLocaleString() : 0;
-
-        // 金額やパンが変わるたびに、裏側でレシートのデータを最新に更新しておく
         updateReceiptUrl();
       }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        updateDisplay();
+      });
 
       function showReport() {
         const body = document.getElementById("report-body");
