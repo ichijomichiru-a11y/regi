@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - 余白カット版</title>
+    <title>パン屋さんのレジ PWA - 完成版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       /* 普段の画面用（印刷エリアは隠しておく） */
@@ -292,13 +292,12 @@
         }
       }
 
-      /* ★ 印刷用のデザイン（余白を最小限に設定） */
+      /* ★ 印刷用のデザイン（58mm用紙の適正サイズに修正） */
       @media print {
         @page {
           margin: 0;
           size: 58mm auto;
         }
-        /* 高さを自動（auto）にして、無駄な白紙が出ないように強制します */
         html,
         body {
           height: auto !important;
@@ -316,22 +315,22 @@
           position: absolute;
           left: 0;
           top: 0;
-          width: 52mm;
+          width: 50mm; /* はみ出し防止のため、少しだけ内側に収めます */
           margin: 0;
-          padding: 10px 0 20px 0; /* 下の余白を最小限の20pxにしました */
+          padding: 5px 4mm 15px 4mm; /* 左右に少し余白を入れて見やすく */
           font-family: sans-serif;
           color: black;
-          font-size: 26px;
-          line-height: 1.3;
+          font-size: 12px; /* ★ ベースの文字サイズを通常のレシートサイズ(12px)に戻しました */
+          line-height: 1.4; /* 行間を少し開けて読みやすく */
         }
         .p-item {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 5px;
+          margin-bottom: 3px;
         }
         .p-line {
-          border-top: 2px dashed black;
-          margin: 10px 0;
+          border-top: 1px dashed black;
+          margin: 5px 0;
         }
         .p-bold {
           font-weight: bold;
@@ -343,11 +342,15 @@
           text-align: center;
         }
         .p-title {
-          font-size: 34px;
+          font-size: 16px;
           font-weight: bold;
           text-align: center;
-          margin-bottom: 15px;
-        }
+          margin-bottom: 8px;
+        } /* ★ お店の名前のサイズを適正化 */
+        .p-total {
+          font-size: 14px;
+          font-weight: bold;
+        } /* 合計金額のサイズ */
       }
     </style>
   </head>
@@ -625,14 +628,12 @@
         });
 
         html += "<div class='p-line'></div>";
-        html += `<div class='p-right p-bold' style='font-size:28px;'>合計: ${total}円</div>`;
+        html += `<div class='p-right p-total'>合計: ${total}円</div>`;
         html += `<div class='p-right'>お預かり: ${parseInt(cashInput)}円</div>`;
 
         const change = parseInt(cashInput) - total;
         html += `<div class='p-right'>お釣り: ${change >= 0 ? change : 0}円</div>`;
         html += "<div class='p-line'></div>";
-
-        // ★ プログラム側にあった無駄な改行(<br>)をすべて削除しました
         html += "<div class='p-center'>ありがとうございました！</div>";
 
         printSection.innerHTML = html;
