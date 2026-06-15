@@ -1,4 +1,4 @@
-const CACHE_NAME = "bakery-regi-v31"; // 番号を一気に飛ばしてv10にします
+const CACHE_NAME = "bakery-regi-v32"; // 番号を一気に飛ばしてv10にします
 
 const urlsToCache = ["./", "./index.html"];
 

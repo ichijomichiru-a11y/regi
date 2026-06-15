@@ -3,300 +3,345 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - 最終突破版</title>
+    <title>パン屋さんのレジ PWA - 標準印刷版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
-      body {
-        font-family: sans-serif;
-        background-color: #fdf5e6;
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-      h1 {
-        margin: 5px 0;
-        text-align: center;
-        color: #5d4037;
-        font-size: 20px;
-      }
-      .container {
-        display: flex;
-        flex: 1;
-        overflow: hidden;
-        padding: 10px;
-        gap: 15px;
+      /* 普段の画面用（印刷エリアは隠しておく） */
+      @media screen {
+        #print-section {
+          display: none;
+        }
+        body {
+          font-family: sans-serif;
+          background-color: #fdf5e6;
+          margin: 0;
+          padding: 0;
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        h1 {
+          margin: 5px 0;
+          text-align: center;
+          color: #5d4037;
+          font-size: 20px;
+        }
+        .container {
+          display: flex;
+          flex: 1;
+          overflow: hidden;
+          padding: 10px;
+          gap: 15px;
+        }
+
+        .menu-wrapper {
+          flex: 1.2;
+          min-width: 320px;
+          display: flex;
+          flex-direction: column;
+        }
+        .menu {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+          flex: 1;
+          overflow-y: auto;
+          padding-right: 5px;
+        }
+        .item-btn {
+          background-color: #fff3e0;
+          border: 2px solid #deb887;
+          height: 85px;
+          color: #5d4037;
+          font-weight: bold;
+          font-size: 15px;
+          cursor: pointer;
+          border-radius: 10px;
+        }
+        .item-btn:active {
+          background-color: #deb887;
+          transform: scale(0.95);
+        }
+
+        .qty-panel {
+          background: #efebe9;
+          padding: 10px;
+          border-radius: 10px;
+          margin-bottom: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+        .qty-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 5px;
+        }
+        .qty-btn {
+          height: 40px;
+          border: 1px solid #8d6e63;
+          background: white;
+          border-radius: 5px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+        .qty-btn.active {
+          background: #8d6e63;
+          color: white;
+        }
+
+        .control-panel {
+          margin-top: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .main-controls {
+          display: flex;
+          gap: 8px;
+        }
+        .undo-btn {
+          background-color: #f0ad4e;
+          color: white;
+          flex: 1;
+          height: 55px;
+          border: none;
+          font-size: 16px;
+          border-radius: 10px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+        .print-btn {
+          background-color: #4caf50;
+          color: white;
+          flex: 1.2;
+          height: 55px;
+          border: none;
+          font-size: 16px;
+          border-radius: 10px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+        .clear-btn {
+          background-color: #d9534f;
+          color: white;
+          flex: 1;
+          height: 55px;
+          border: none;
+          font-size: 16px;
+          border-radius: 10px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+        .report-btn {
+          background-color: #5bc0de;
+          color: white;
+          height: 40px;
+          border: none;
+          font-size: 15px;
+          border-radius: 10px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        .receipt-container {
+          flex: 1.5;
+          display: flex;
+          background: white;
+          border: 2px solid #333;
+          box-shadow: 5px 5px 0px #ccc;
+          padding: 15px;
+          gap: 20px;
+        }
+        .receipt-left {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          border-right: 2px solid #eee;
+          padding-right: 15px;
+          min-width: 200px;
+        }
+        #item-list {
+          flex: 1;
+          overflow-y: auto;
+          text-align: left;
+          font-size: 16px;
+        }
+        .total-area {
+          font-size: 32px;
+          font-weight: bold;
+          margin-top: 5px;
+          text-align: right;
+          color: #d32f2f;
+          border-top: 3px solid #333;
+          padding-top: 5px;
+        }
+
+        .receipt-right {
+          width: 320px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+        }
+        .tenkey-container {
+          background: #f5f5f5;
+          padding: 12px;
+          border-radius: 12px;
+          border: 1px solid #ddd;
+        }
+        .tenkey-display {
+          background: white;
+          border: 2px solid #999;
+          font-size: 32px;
+          padding: 5px 15px;
+          text-align: right;
+          margin-bottom: 12px;
+          height: 45px;
+          line-height: 45px;
+          font-family: monospace;
+          font-weight: bold;
+        }
+        .tenkey-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+        }
+        .tenkey-btn {
+          height: 60px;
+          font-size: 24px;
+          background: white;
+          border: 1px solid #bbb;
+          border-radius: 10px;
+          font-weight: bold;
+          cursor: pointer;
+          box-shadow: 0 3px 0 #ccc;
+        }
+        .tenkey-btn:active {
+          transform: translateY(3px);
+          box-shadow: none;
+        }
+        .tenkey-clear {
+          background: #cfd8dc;
+        }
+
+        .change-display {
+          font-size: 30px;
+          color: #1976d2;
+          font-weight: bold;
+          text-align: right;
+          margin-top: 15px;
+          border-top: 2px dashed #ccc;
+          padding-top: 10px;
+        }
+
+        #report-modal {
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: white;
+          border: 3px solid #333;
+          padding: 20px;
+          z-index: 100;
+          width: 90%;
+          max-width: 500px;
+          border-radius: 15px;
+        }
+        .modal-overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 99;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th,
+        td {
+          border: 1px solid #ccc;
+          padding: 10px;
+          text-align: right;
+        }
+        .csv-btn {
+          background-color: #2e7d32;
+          color: white;
+          margin-top: 15px;
+          width: 100%;
+          height: 50px;
+          border: none;
+          font-size: 18px;
+          border-radius: 10px;
+          cursor: pointer;
+        }
+        .reset-sales-btn {
+          background-color: #d9534f;
+          color: white;
+          margin-top: 10px;
+          width: 100%;
+          height: 40px;
+          border: none;
+          font-size: 16px;
+          border-radius: 10px;
+          cursor: pointer;
+        }
       }
 
-      .menu-wrapper {
-        flex: 1.2;
-        min-width: 320px;
-        display: flex;
-        flex-direction: column;
-      }
-      .menu {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        flex: 1;
-        overflow-y: auto;
-        padding-right: 5px;
-      }
-      .item-btn {
-        background-color: #fff3e0;
-        border: 2px solid #deb887;
-        height: 85px;
-        color: #5d4037;
-        font-weight: bold;
-        font-size: 15px;
-        cursor: pointer;
-        border-radius: 10px;
-      }
-      .item-btn:active {
-        background-color: #deb887;
-        transform: scale(0.95);
-      }
-
-      .qty-panel {
-        background: #efebe9;
-        padding: 10px;
-        border-radius: 10px;
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-      .qty-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 5px;
-      }
-      .qty-btn {
-        height: 40px;
-        border: 1px solid #8d6e63;
-        background: white;
-        border-radius: 5px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .qty-btn.active {
-        background: #8d6e63;
-        color: white;
-      }
-
-      .control-panel {
-        margin-top: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .main-controls {
-        display: flex;
-        gap: 8px;
-      }
-      .undo-btn {
-        background-color: #f0ad4e;
-        color: white;
-        flex: 1;
-        height: 55px;
-        border: none;
-        font-size: 16px;
-        border-radius: 10px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-
-      /* 印刷ボタンのデザイン */
-      .print-btn {
-        background-color: #4caf50;
-        color: white;
-        flex: 1.2;
-        height: 55px;
-        border: none;
-        font-size: 16px;
-        border-radius: 10px;
-        font-weight: bold;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-      }
-
-      .clear-btn {
-        background-color: #d9534f;
-        color: white;
-        flex: 1;
-        height: 55px;
-        border: none;
-        font-size: 16px;
-        border-radius: 10px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .report-btn {
-        background-color: #5bc0de;
-        color: white;
-        height: 40px;
-        border: none;
-        font-size: 15px;
-        border-radius: 10px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-
-      .receipt-container {
-        flex: 1.5;
-        display: flex;
-        background: white;
-        border: 2px solid #333;
-        box-shadow: 5px 5px 0px #ccc;
-        padding: 15px;
-        gap: 20px;
-      }
-      .receipt-left {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        border-right: 2px solid #eee;
-        padding-right: 15px;
-        min-width: 200px;
-      }
-      #item-list {
-        flex: 1;
-        overflow-y: auto;
-        text-align: left;
-        font-size: 16px;
-      }
-      .total-area {
-        font-size: 32px;
-        font-weight: bold;
-        margin-top: 5px;
-        text-align: right;
-        color: #d32f2f;
-        border-top: 3px solid #333;
-        padding-top: 5px;
-      }
-
-      .receipt-right {
-        width: 320px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-      }
-      .tenkey-container {
-        background: #f5f5f5;
-        padding: 12px;
-        border-radius: 12px;
-        border: 1px solid #ddd;
-      }
-      .tenkey-display {
-        background: white;
-        border: 2px solid #999;
-        font-size: 32px;
-        padding: 5px 15px;
-        text-align: right;
-        margin-bottom: 12px;
-        height: 45px;
-        line-height: 45px;
-        font-family: monospace;
-        font-weight: bold;
-      }
-      .tenkey-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-      }
-      .tenkey-btn {
-        height: 60px;
-        font-size: 24px;
-        background: white;
-        border: 1px solid #bbb;
-        border-radius: 10px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 3px 0 #ccc;
-      }
-      .print-btn:active,
-      .clear-btn:active,
-      .undo-btn:active,
-      .tenkey-btn:active {
-        transform: scale(0.98);
-      }
-      .tenkey-clear {
-        background: #cfd8dc;
-      }
-
-      .change-display {
-        font-size: 30px;
-        color: #1976d2;
-        font-weight: bold;
-        text-align: right;
-        margin-top: 15px;
-        border-top: 2px dashed #ccc;
-        padding-top: 10px;
-      }
-
-      #report-modal {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        border: 3px solid #333;
-        padding: 20px;
-        z-index: 100;
-        width: 90%;
-        max-width: 500px;
-        border-radius: 15px;
-      }
-      .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 99;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      th,
-      td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: right;
-      }
-      .csv-btn {
-        background-color: #2e7d32;
-        color: white;
-        margin-top: 15px;
-        width: 100%;
-        height: 50px;
-        border: none;
-        font-size: 18px;
-        border-radius: 10px;
-        cursor: pointer;
-      }
-      .reset-sales-btn {
-        background-color: #d9534f;
-        color: white;
-        margin-top: 10px;
-        width: 100%;
-        height: 40px;
-        border: none;
-        font-size: 16px;
-        border-radius: 10px;
-        cursor: pointer;
+      /* ★ 印刷用（印刷する時だけレジ画面を消し、58mm幅のレシートだけを表示する） */
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #print-section,
+        #print-section * {
+          visibility: visible;
+        }
+        #print-section {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 48mm; /* 58mm用紙に収まる幅に設定 */
+          margin: 0;
+          padding: 0;
+          font-family: sans-serif;
+          color: black;
+          font-size: 12px; /* レシート用サイズ */
+        }
+        .p-item {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 2px;
+        }
+        .p-line {
+          border-top: 1px dashed black;
+          margin: 5px 0;
+        }
+        .p-bold {
+          font-weight: bold;
+        }
+        .p-right {
+          text-align: right;
+        }
+        .p-center {
+          text-align: center;
+        }
+        .p-title {
+          font-size: 16px;
+          font-weight: bold;
+          text-align: center;
+          margin-bottom: 10px;
+        }
       }
     </style>
   </head>
   <body>
+    <div id="print-section"></div>
+
     <h1>🥖 パン屋さんレジ PWA 🥐</h1>
 
     <div class="container">
@@ -334,14 +379,9 @@
           <div class="main-controls">
             <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
 
-            <a
-              href="#"
-              id="print-btn"
-              class="print-btn"
-              onclick="handlePrintClick(event)"
-              target="_blank"
-              >🧾 レシート</a
-            >
+            <button class="print-btn" onclick="printReceipt()">
+              🧾 レシート
+            </button>
 
             <button class="clear-btn" onclick="resetCalcManual()">
               会計確定
@@ -511,7 +551,6 @@
         cashInput = "0";
         currentOrder = [];
         document.getElementById("item-list").innerHTML = "";
-        updateReceiptUrl();
       }
 
       function renderItemList() {
@@ -556,59 +595,43 @@
         }
       }
 
-      // ★ 最新：HTML（日本語画像化データ）を最も強力な Android Intent 形式でセットする
-      function updateReceiptUrl() {
-        const printBtn = document.getElementById("print-btn");
+      // ★ 新機能：ブラウザの「標準印刷」を呼び出す
+      function printReceipt() {
         if (currentOrder.length === 0) {
-          printBtn.href = "#";
+          alert("印刷する注文がありません。");
           return;
         }
 
-        let html =
-          "<div style='width: 100%; font-family: sans-serif; color: black; font-size: 24px;'>";
-        html +=
-          "<h2 style='text-align: center; margin: 0 0 10px 0;'>🍞 パン屋さん 🍞</h2>";
-        html += "<hr style='border: 1px dashed black; margin-bottom: 10px;' />";
+        const printSection = document.getElementById("print-section");
+
+        // 印刷用のレイアウトを作る
+        let html = "<div class='p-title'>🍞 パン屋さん 🍞</div>";
+        html += "<div class='p-line'></div>";
 
         currentOrder.forEach((item) => {
-          let qtyText =
-            item.qty > 1
-              ? ` <span style='font-weight:bold;'>x${item.qty}</span>`
-              : "";
-          html += `<div style='display: flex; justify-content: space-between; margin-bottom: 5px;'>
+          let qtyText = item.qty > 1 ? ` x${item.qty}` : "";
+          html += `<div class='p-item'>
                             <span>${item.name}${qtyText}</span>
                             <span>${item.price * item.qty}円</span>
                          </div>`;
         });
 
-        html += "<hr style='border: 1px dashed black; margin: 10px 0;' />";
-        html += `<div style='text-align: right; font-weight: bold; font-size: 28px;'>合計: ${total}円</div>`;
-        html += `<div style='text-align: right; margin-top: 5px;'>お預かり: ${parseInt(cashInput)}円</div>`;
+        html += "<div class='p-line'></div>";
+        html += `<div class='p-right p-bold' style='font-size:16px;'>合計: ${total}円</div>`;
+        html += `<div class='p-right'>お預かり: ${parseInt(cashInput)}円</div>`;
 
         const change = parseInt(cashInput) - total;
-        html += `<div style='text-align: right;'>お釣り: ${change >= 0 ? change : 0}円</div>`;
-        html += "<hr style='border: 1px dashed black; margin: 10px 0;' />";
-        html +=
-          "<div style='text-align: center; margin-top: 10px;'>ありがとうございました！</div>";
-        html += "</div>";
+        html += `<div class='p-right'>お釣り: ${change >= 0 ? change : 0}円</div>`;
+        html += "<div class='p-line'></div>";
+        html += "<div class='p-center'>ありがとうございました！</div>";
+        html += "<br><br><br>"; // 紙を切るための余白
 
-        const base64Data = btoa(unescape(encodeURIComponent(html)));
+        printSection.innerHTML = html;
 
-        // Androidの壁を最も突破しやすい「Intent」形式 ＋ scheme=rawbt の組み合わせ
-        printBtn.href =
-          "intent:data:text/html;base64," +
-          base64Data +
-          "#Intent;scheme=rawbt;end;";
-      }
+        // ブラウザの印刷ダイアログを呼び出す！
+        window.print();
 
-      function handlePrintClick(event) {
-        if (currentOrder.length === 0) {
-          alert("印刷する注文がありません。");
-          event.preventDefault();
-          return;
-        }
-
-        // 印刷処理へ飛んだあと、1秒後にレジ画面を自動クリア
+        // 印刷が終わった（またはキャンセルした）後、少し待ってから画面をクリア
         setTimeout(() => {
           autoCommitOrder();
           updateDisplay();
@@ -640,12 +663,7 @@
         const change = parseInt(cashInput) - total;
         document.getElementById("change").innerText =
           change >= 0 && total > 0 ? change.toLocaleString() : 0;
-        updateReceiptUrl();
       }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        updateDisplay();
-      });
 
       function showReport() {
         const body = document.getElementById("report-body");
