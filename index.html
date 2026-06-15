@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pan pequeño レジ PWA - 余白160px</title>
+    <title>pan pequeño レジ PWA - 導線最適化</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       /* 普段の画面用（印刷エリアは隠しておく） */
@@ -103,7 +103,7 @@
         .undo-btn {
           background-color: #f0ad4e;
           color: white;
-          flex: 1;
+          width: 100%;
           height: 55px;
           border: none;
           font-size: 16px;
@@ -111,13 +111,20 @@
           font-weight: bold;
           cursor: pointer;
         }
+
+        /* ★ お釣りの下に配置するボタンのレイアウト設定を追加 */
+        .action-buttons {
+          display: flex;
+          gap: 10px;
+          margin-top: 15px;
+        }
         .print-btn {
           background-color: #4caf50;
           color: white;
           flex: 1.2;
-          height: 55px;
+          height: 60px;
           border: none;
-          font-size: 16px;
+          font-size: 18px;
           border-radius: 10px;
           font-weight: bold;
           cursor: pointer;
@@ -126,13 +133,14 @@
           background-color: #d9534f;
           color: white;
           flex: 1;
-          height: 55px;
+          height: 60px;
           border: none;
-          font-size: 16px;
+          font-size: 18px;
           border-radius: 10px;
           font-weight: bold;
           cursor: pointer;
         }
+
         .report-btn {
           background-color: #5bc0de;
           color: white;
@@ -216,7 +224,9 @@
           cursor: pointer;
           box-shadow: 0 3px 0 #ccc;
         }
-        .tenkey-btn:active {
+        .tenkey-btn:active,
+        .print-btn:active,
+        .clear-btn:active {
           transform: translateY(3px);
           box-shadow: none;
         }
@@ -375,6 +385,49 @@
     <h1>🥖 pan pequeño (ぺけぱん) レジ 🥐</h1>
 
     <div class="container">
+      <!-- 左側：パンのボタン・操作エリア（元に戻しました） -->
+      <div class="menu-wrapper">
+        <div class="qty-panel">
+          <div
+            style="
+              font-size: 13px;
+              font-weight: bold;
+              color: #5d4037;
+              margin-bottom: 5px;
+            "
+          >
+            個数を選択してからパンを押す：
+          </div>
+          <div class="qty-grid">
+            <button id="qty1" class="qty-btn active" onclick="setQty(1)">
+              ×1
+            </button>
+            <button id="qty2" class="qty-btn" onclick="setQty(2)">×2</button>
+            <button id="qty3" class="qty-btn" onclick="setQty(3)">×3</button>
+            <button id="qty4" class="qty-btn" onclick="setQty(4)">×4</button>
+            <button id="qty5" class="qty-btn" onclick="setQty(5)">×5</button>
+            <button id="qty6" class="qty-btn" onclick="setQty(6)">×6</button>
+            <button id="qty7" class="qty-btn" onclick="setQty(7)">×7</button>
+            <button id="qty8" class="qty-btn" onclick="setQty(8)">×8</button>
+            <button id="qty9" class="qty-btn" onclick="setQty(9)">×9</button>
+            <button id="qty10" class="qty-btn" onclick="setQty(10)">×10</button>
+          </div>
+        </div>
+
+        <div class="menu" id="button-container"></div>
+
+        <div class="control-panel">
+          <div class="main-controls">
+            <!-- レシート・確定ボタンはお引越ししたので、ここは「一つ戻る」だけにします -->
+            <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
+          </div>
+          <button class="report-btn" onclick="showReport()">
+            📈 本日の売上を確認
+          </button>
+        </div>
+      </div>
+
+      <!-- 右側：会計・テンキーエリア（元に戻しました） -->
       <div class="receipt-container">
         <div class="receipt-left">
           <h3 style="margin: 0 0 10px 0; font-size: 18px">注文内容</h3>
@@ -412,45 +465,13 @@
               </button>
             </div>
           </div>
+
           <div id="change-area" class="change-display">
             お釣り: <span id="change">0</span>円
           </div>
-        </div>
-      </div>
 
-      <div class="menu-wrapper">
-        <div class="qty-panel">
-          <div
-            style="
-              font-size: 13px;
-              font-weight: bold;
-              color: #5d4037;
-              margin-bottom: 5px;
-            "
-          >
-            個数を選択してからパンを押す：
-          </div>
-          <div class="qty-grid">
-            <button id="qty1" class="qty-btn active" onclick="setQty(1)">
-              ×1
-            </button>
-            <button id="qty2" class="qty-btn" onclick="setQty(2)">×2</button>
-            <button id="qty3" class="qty-btn" onclick="setQty(3)">×3</button>
-            <button id="qty4" class="qty-btn" onclick="setQty(4)">×4</button>
-            <button id="qty5" class="qty-btn" onclick="setQty(5)">×5</button>
-            <button id="qty6" class="qty-btn" onclick="setQty(6)">×6</button>
-            <button id="qty7" class="qty-btn" onclick="setQty(7)">×7</button>
-            <button id="qty8" class="qty-btn" onclick="setQty(8)">×8</button>
-            <button id="qty9" class="qty-btn" onclick="setQty(9)">×9</button>
-            <button id="qty10" class="qty-btn" onclick="setQty(10)">×10</button>
-          </div>
-        </div>
-
-        <div class="menu" id="button-container"></div>
-
-        <div class="control-panel">
-          <div class="main-controls">
-            <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
+          <!-- ★ ここに「レシート」と「会計確定」のボタンを新しく配置しました！ -->
+          <div class="action-buttons">
             <button class="print-btn" onclick="printReceipt()">
               🧾 レシート
             </button>
@@ -458,9 +479,6 @@
               会計確定
             </button>
           </div>
-          <button class="report-btn" onclick="showReport()">
-            📈 本日の売上を確認
-          </button>
         </div>
       </div>
     </div>
@@ -653,7 +671,6 @@
 
         html += "<div class='p-thanks'>thank you!</div>";
 
-        // ★ 高さを 160px に変更し、安全に手でカットできる余白を作りました
         html += "<div style='height: 160px;'></div>";
 
         printSection.innerHTML = html;
