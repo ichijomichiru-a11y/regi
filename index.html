@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pan Pequeño レジ PWA</title>
+    <title>pan pequeño レジ PWA</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       /* 普段の画面用（印刷エリアは隠しておく） */
@@ -341,21 +341,32 @@
         .p-center {
           text-align: center;
         }
+
+        /* ★ タイトルとサブタイトルを「normal（普通の太さ）」に変更しました */
         .p-title {
           font-size: 22px;
-          font-weight: bold;
+          font-weight: normal;
           text-align: center;
           margin-bottom: 2px;
         }
         .p-subtitle {
           font-size: 14px;
-          font-weight: bold;
+          font-weight: normal;
           text-align: center;
           margin-bottom: 8px;
         }
+
         .p-total {
           font-size: 14px;
           font-weight: bold;
+        }
+
+        /* ★ 新しく「thank you!」用の筆記体デザインを追加しました */
+        .p-thanks {
+          font-size: 16px;
+          text-align: center;
+          font-family: "Brush Script MT", "Comic Sans MS", cursive;
+          margin-top: 8px;
         }
       }
     </style>
@@ -363,7 +374,7 @@
   <body>
     <div id="print-section"></div>
 
-    <h1>🥖 Pan Pequeño (ぺけぱん) レジ 🥐</h1>
+    <h1>🥖 pan pequeño (ぺけぱん) レジ 🥐</h1>
 
     <div class="container">
       <div class="menu-wrapper">
@@ -622,8 +633,8 @@
 
         const printSection = document.getElementById("print-section");
 
-        // ★ ここにお店の名前と愛称の両方を組み込みました！
-        let html = "<div class='p-title'>Pan Pequeño</div>";
+        // ★ 文字を小文字の「pan pequeño」に変更しました
+        let html = "<div class='p-title'>pan pequeño</div>";
         html += "<div class='p-subtitle'>- ぺけぱん -</div>";
         html += "<div class='p-line'></div>";
 
@@ -643,9 +654,10 @@
         html += `<div class='p-right'>お釣り: ${change >= 0 ? change : 0}円</div>`;
         html += "<div class='p-line'></div>";
 
-        html += "<div class='p-center'>ありがとうございました！</div>";
+        // ★ クラスを「p-thanks」に変更し、筆記体の「thank you!」にしました
+        html += "<div class='p-thanks'>thank you!</div>";
 
-        // ★ 5mm程度の余白
+        // 5mm程度の余白
         html += "<div style='height: 40px;'></div>";
 
         printSection.innerHTML = html;
