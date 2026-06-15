@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pan pequeño レジ PWA - 右手特化レイアウト</title>
+    <title>pan pequeño レジ PWA - 余白拡大</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       /* 普段の画面用（印刷エリアは隠しておく） */
@@ -652,7 +652,9 @@
         html += "<div class='p-line'></div>";
 
         html += "<div class='p-thanks'>thank you!</div>";
-        html += "<div style='height: 40px;'></div>";
+
+        // ★ 高さを 80px にして、約5mm〜1cmの確実な余白を作りました
+        html += "<div style='height: 80px;'></div>";
 
         printSection.innerHTML = html;
 
