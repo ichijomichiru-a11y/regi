@@ -544,14 +544,15 @@
         }
       }
 
-      // ★ レシート印刷機能（ボタン一発・ID修正版）
+      // ★ レシート印刷機能（日本語の画像化 ＆ 共有メニュー回避版）
       function printReceipt() {
         if (currentOrder.length === 0) {
           alert("印刷する注文がありません。");
           return;
         }
 
-        // 1. レシートの綺麗なデザインを組み立てる
+        // 1. HTML形式でレシートの綺麗なデザインを組み立てる
+        // ※HTMLで送ることで、RawBTが自動的に「画像」に変換して印刷するため、絶対に文字化けしません！
         let html =
           "<div style='width: 100%; font-family: sans-serif; color: black; font-size: 24px;'>";
         html +=
@@ -580,17 +581,19 @@
           "<div style='text-align: center; margin-top: 10px;'>ありがとうございました！</div>";
         html += "</div>";
 
-        // 2. RawBTにデータを送信する（★ 正しいアプリID「ru.a2012.rawbtprinter」に修正しました）
+        // 2. RawBTにデータを送信する
+        // ★ Playストアのエラーを回避するため、パッケージ名の指定(package=...)を削除しました！
         const base64Data = btoa(unescape(encodeURIComponent(html)));
         const intentUrl =
           "intent:data:text/html;base64," +
           base64Data +
-          "#Intent;scheme=rawbt;package=ru.a2012.rawbtprinter;end;";
+          "#Intent;scheme=rawbt;end;";
 
         const link = document.createElement("a");
         link.href = intentUrl;
         link.target = "_top";
 
+        // 裏側でこっそりリンクをクリックさせてRawBTを呼び出す
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
