@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - レシート印刷版</title>
+    <title>パン屋さんのレジ PWA - 直通リンク印刷版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       body {
@@ -29,7 +29,6 @@
         gap: 15px;
       }
 
-      /* 左側：商品ボタンエリア */
       .menu-wrapper {
         flex: 1.2;
         min-width: 320px;
@@ -59,7 +58,6 @@
         transform: scale(0.95);
       }
 
-      /* 個数選択パネル */
       .qty-panel {
         background: #efebe9;
         padding: 10px;
@@ -87,7 +85,6 @@
         color: white;
       }
 
-      /* 左下：操作パネル */
       .control-panel {
         margin-top: 10px;
         display: flex;
@@ -109,7 +106,8 @@
         font-weight: bold;
         cursor: pointer;
       }
-      /* ★ 印刷ボタンを追加 */
+
+      /* ★ 印刷ボタン（リンク）のデザイン */
       .print-btn {
         background-color: #4caf50;
         color: white;
@@ -120,7 +118,12 @@
         border-radius: 10px;
         font-weight: bold;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
       }
+
       .clear-btn {
         background-color: #d9534f;
         color: white;
@@ -143,7 +146,6 @@
         cursor: pointer;
       }
 
-      /* 右側：会計エリア */
       .receipt-container {
         flex: 1.5;
         display: flex;
@@ -329,9 +331,15 @@
         <div class="control-panel">
           <div class="main-controls">
             <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
-            <button class="print-btn" onclick="printReceipt()">
-              🧾 レシート
-            </button>
+
+            <a
+              href="#"
+              id="print-btn"
+              class="print-btn"
+              onclick="handlePrintClick(event)"
+              >🧾 レシート</a
+            >
+
             <button class="clear-btn" onclick="resetCalcManual()">
               会計確定
             </button>
@@ -500,6 +508,7 @@
         cashInput = "0";
         currentOrder = [];
         document.getElementById("item-list").innerHTML = "";
+        updateReceiptUrl(); // カゴが空になったのでリンクも空にする
       }
 
       function renderItemList() {
@@ -513,7 +522,7 @@
           itemElement.style.justifyContent = "space-between";
           const qtyText =
             item.qty > 1
-              ? ` <span style="color:red; font-weight:bold;">×${item.qty}</span>`
+              ? ` <span style='color:red; font-weight:bold;'>×${item.qty}</span>`
               : "";
           const itemSubtotal = item.price * item.qty;
           itemElement.innerHTML = `<span>・${item.name}${qtyText}</span><span>${itemSubtotal.toLocaleString()}円</span>`;
@@ -544,15 +553,14 @@
         }
       }
 
-      // ★ レシート印刷機能（日本語の画像化 ＆ 共有メニュー回避版）
-      function printReceipt() {
+      // ★ 新機能：画面が更新されるたびに「印刷用データ」をボタン（リンク）にセットしておく
+      function updateReceiptUrl() {
+        const printBtn = document.getElementById("print-btn");
         if (currentOrder.length === 0) {
-          alert("印刷する注文がありません。");
+          printBtn.href = "#";
           return;
         }
 
-        // 1. HTML形式でレシートの綺麗なデザインを組み立てる
-        // ※HTMLで送ることで、RawBTが自動的に「画像」に変換して印刷するため、絶対に文字化けしません！
         let html =
           "<div style='width: 100%; font-family: sans-serif; color: black; font-size: 24px;'>";
         html +=
@@ -581,27 +589,25 @@
           "<div style='text-align: center; margin-top: 10px;'>ありがとうございました！</div>";
         html += "</div>";
 
-        // 2. RawBTにデータを送信する
-        // ★ Playストアのエラーを回避するため、パッケージ名の指定(package=...)を削除しました！
         const base64Data = btoa(unescape(encodeURIComponent(html)));
-        const intentUrl =
-          "intent:data:text/html;base64," +
-          base64Data +
-          "#Intent;scheme=rawbt;end;";
+        // ユーザーがタップした瞬間、RawBTにこのHTMLデータを渡して起動させる
+        printBtn.href = "rawbt:data:text/html;base64," + base64Data;
+      }
 
-        const link = document.createElement("a");
-        link.href = intentUrl;
-        link.target = "_top";
+      // ★ レシートボタンがタップされた時の処理
+      function handlePrintClick(event) {
+        if (currentOrder.length === 0) {
+          alert("印刷する注文がありません。");
+          event.preventDefault(); // 何もしない
+          return;
+        }
 
-        // 裏側でこっそりリンクをクリックさせてRawBTを呼び出す
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // 3. 印刷後、自動的に売上を確定して画面をリセット
-        autoCommitOrder();
-        updateDisplay();
-        setQty(1);
+        // RawBTへのジャンプ（リンク）は許可しつつ、1秒後に画面をリセットする
+        setTimeout(() => {
+          autoCommitOrder();
+          updateDisplay();
+          setQty(1);
+        }, 1000);
       }
 
       function pressKey(key) {
@@ -628,6 +634,9 @@
         const change = parseInt(cashInput) - total;
         document.getElementById("change").innerText =
           change >= 0 && total > 0 ? change.toLocaleString() : 0;
+
+        // 金額やパンが変わるたびに、裏側でレシートのデータを最新に更新しておく
+        updateReceiptUrl();
       }
 
       function showReport() {
