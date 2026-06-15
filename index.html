@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - 完成版</title>
+    <title>Pan Pequeño レジ PWA</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       /* 普段の画面用（印刷エリアは隠しておく） */
@@ -292,7 +292,7 @@
         }
       }
 
-      /* ★ 印刷用のデザイン（58mm用紙の適正サイズに修正） */
+      /* ★ 印刷用のデザイン */
       @media print {
         @page {
           margin: 0;
@@ -315,13 +315,13 @@
           position: absolute;
           left: 0;
           top: 0;
-          width: 50mm; /* はみ出し防止のため、少しだけ内側に収めます */
+          width: 50mm;
           margin: 0;
-          padding: 5px 4mm 15px 4mm; /* 左右に少し余白を入れて見やすく */
+          padding: 5px 4mm 5px 4mm;
           font-family: sans-serif;
           color: black;
-          font-size: 12px; /* ★ ベースの文字サイズを通常のレシートサイズ(12px)に戻しました */
-          line-height: 1.4; /* 行間を少し開けて読みやすく */
+          font-size: 12px;
+          line-height: 1.4;
         }
         .p-item {
           display: flex;
@@ -342,22 +342,28 @@
           text-align: center;
         }
         .p-title {
-          font-size: 16px;
+          font-size: 22px;
+          font-weight: bold;
+          text-align: center;
+          margin-bottom: 2px;
+        }
+        .p-subtitle {
+          font-size: 14px;
           font-weight: bold;
           text-align: center;
           margin-bottom: 8px;
-        } /* ★ お店の名前のサイズを適正化 */
+        }
         .p-total {
           font-size: 14px;
           font-weight: bold;
-        } /* 合計金額のサイズ */
+        }
       }
     </style>
   </head>
   <body>
     <div id="print-section"></div>
 
-    <h1>🥖 パン屋さんレジ PWA 🥐</h1>
+    <h1>🥖 Pan Pequeño (ぺけぱん) レジ 🥐</h1>
 
     <div class="container">
       <div class="menu-wrapper">
@@ -616,7 +622,9 @@
 
         const printSection = document.getElementById("print-section");
 
-        let html = "<div class='p-title'>🍞 パン屋さん 🍞</div>";
+        // ★ ここにお店の名前と愛称の両方を組み込みました！
+        let html = "<div class='p-title'>Pan Pequeño</div>";
+        html += "<div class='p-subtitle'>- ぺけぱん -</div>";
         html += "<div class='p-line'></div>";
 
         currentOrder.forEach((item) => {
@@ -634,7 +642,11 @@
         const change = parseInt(cashInput) - total;
         html += `<div class='p-right'>お釣り: ${change >= 0 ? change : 0}円</div>`;
         html += "<div class='p-line'></div>";
+
         html += "<div class='p-center'>ありがとうございました！</div>";
+
+        // ★ 5mm程度の余白
+        html += "<div style='height: 40px;'></div>";
 
         printSection.innerHTML = html;
 
