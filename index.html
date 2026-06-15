@@ -544,7 +544,7 @@
         }
       }
 
-      // ★ レシート印刷機能（In-App Browserのブロック突破版）
+      // ★ レシート印刷機能（最新のRawBTアプリID対応版）
       function printReceipt() {
         if (currentOrder.length === 0) {
           alert("印刷する注文がありません。");
@@ -580,19 +580,18 @@
           "<div style='text-align: center; margin-top: 10px;'>ありがとうございました！</div>";
         html += "</div>";
 
-        // 2. RawBTにデータを送信する（Androidの壁抜けコード）
+        // 2. RawBTにデータを送信する（★パッケージ名を最新の ru.a402d.rawbtprinter に修正しました）
         const base64Data = btoa(unescape(encodeURIComponent(html)));
 
-        // Androidのシステムに「RawBTアプリを強制起動して」と伝える専用のURL形式
+        // 最新のRawBTのIDを指定したURL
         const intentUrl =
           "intent:data:text/html;base64," +
           base64Data +
-          "#Intent;scheme=rawbt;package=ru.a2012.rawbtprint;end;";
+          "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
 
-        // プログラムの裏側で見えないリンクを作り、強制的にクリックさせる
         const link = document.createElement("a");
         link.href = intentUrl;
-        link.target = "_top"; // アプリ内ブラウザの枠を抜け出す魔法の設定
+        link.target = "_top";
 
         document.body.appendChild(link);
         link.click();
