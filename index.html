@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>パン屋さんのレジ PWA - 印刷文字サイズ大</title>
+    <title>パン屋さんのレジ PWA - 余白カット版</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       /* 普段の画面用（印刷エリアは隠しておく） */
@@ -292,12 +292,19 @@
         }
       }
 
-      /* ★ 印刷用のデザイン（文字を大幅に大きくしました） */
+      /* ★ 印刷用のデザイン（余白を最小限に設定） */
       @media print {
         @page {
           margin: 0;
           size: 58mm auto;
-        } /* 用紙サイズをプリンターに伝える */
+        }
+        /* 高さを自動（auto）にして、無駄な白紙が出ないように強制します */
+        html,
+        body {
+          height: auto !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
         body * {
           visibility: hidden;
         }
@@ -309,12 +316,12 @@
           position: absolute;
           left: 0;
           top: 0;
-          width: 52mm; /* はみ出さないように少し余裕を持たせる */
+          width: 52mm;
           margin: 0;
-          padding: 10px 0;
+          padding: 10px 0 20px 0; /* 下の余白を最小限の20pxにしました */
           font-family: sans-serif;
           color: black;
-          font-size: 26px; /* ★ 文字の基本サイズを12pxから26pxに拡大 */
+          font-size: 26px;
           line-height: 1.3;
         }
         .p-item {
@@ -325,7 +332,7 @@
         .p-line {
           border-top: 2px dashed black;
           margin: 10px 0;
-        } /* ★ 点線を太く */
+        }
         .p-bold {
           font-weight: bold;
         }
@@ -340,7 +347,7 @@
           font-weight: bold;
           text-align: center;
           margin-bottom: 15px;
-        } /* ★ タイトルをさらに大きく */
+        }
       }
     </style>
   </head>
@@ -624,8 +631,9 @@
         const change = parseInt(cashInput) - total;
         html += `<div class='p-right'>お釣り: ${change >= 0 ? change : 0}円</div>`;
         html += "<div class='p-line'></div>";
+
+        // ★ プログラム側にあった無駄な改行(<br>)をすべて削除しました
         html += "<div class='p-center'>ありがとうございました！</div>";
-        html += "<br><br><br>";
 
         printSection.innerHTML = html;
 
