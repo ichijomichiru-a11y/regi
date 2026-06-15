@@ -544,56 +544,61 @@
         }
       }
 
-      // ★ 新・レシート印刷機能（Androidの「共有」機能を使って100%壁を抜ける版）
+      // ★ レシート印刷機能（ボタン一発・ID修正版）
       function printReceipt() {
         if (currentOrder.length === 0) {
           alert("印刷する注文がありません。");
           return;
         }
 
-        // 1. レシートのテキストデータを組み立てる
-        let receiptText = "🍞 パン屋さん 🍞\n";
-        receiptText += "----------------------------\n";
+        // 1. レシートの綺麗なデザインを組み立てる
+        let html =
+          "<div style='width: 100%; font-family: sans-serif; color: black; font-size: 24px;'>";
+        html +=
+          "<h2 style='text-align: center; margin: 0 0 10px 0;'>🍞 パン屋さん 🍞</h2>";
+        html += "<hr style='border: 1px dashed black; margin-bottom: 10px;' />";
 
         currentOrder.forEach((item) => {
-          let qtyText = item.qty > 1 ? ` x${item.qty}` : "";
-          receiptText += `${item.name}${qtyText}\n`;
-
-          // 金額を右側に寄せるための調整
-          let priceText = `${item.price * item.qty}円`;
-          let spaces = " ".repeat(Math.max(1, 28 - priceText.length));
-          receiptText += spaces + priceText + "\n";
+          let qtyText =
+            item.qty > 1
+              ? ` <span style='font-weight:bold;'>x${item.qty}</span>`
+              : "";
+          html += `<div style='display: flex; justify-content: space-between; margin-bottom: 5px;'>
+                            <span>${item.name}${qtyText}</span>
+                            <span>${item.price * item.qty}円</span>
+                         </div>`;
         });
 
-        receiptText += "----------------------------\n";
-        receiptText += `合計: ${total}円\n`;
-        receiptText += `お預かり: ${parseInt(cashInput)}円\n`;
+        html += "<hr style='border: 1px dashed black; margin: 10px 0;' />";
+        html += `<div style='text-align: right; font-weight: bold; font-size: 28px;'>合計: ${total}円</div>`;
+        html += `<div style='text-align: right; margin-top: 5px;'>お預かり: ${parseInt(cashInput)}円</div>`;
 
         const change = parseInt(cashInput) - total;
-        receiptText += `お釣り: ${change >= 0 ? change : 0}円\n`;
-        receiptText += "----------------------------\n";
-        receiptText += "ありがとうございました！\n\n\n\n";
+        html += `<div style='text-align: right;'>お釣り: ${change >= 0 ? change : 0}円</div>`;
+        html += "<hr style='border: 1px dashed black; margin: 10px 0;' />";
+        html +=
+          "<div style='text-align: center; margin-top: 10px;'>ありがとうございました！</div>";
+        html += "</div>";
 
-        // 2. Android標準の「共有（Share）」機能を使ってRawBTを呼び出す
-        if (navigator.share) {
-          navigator
-            .share({
-              title: "レシート印刷",
-              text: receiptText,
-            })
-            .then(() => {
-              // 共有メニューでRawBTを選んで送信できたら、売上を確定してリセット
-              autoCommitOrder();
-              updateDisplay();
-              setQty(1);
-            })
-            .catch((error) => {
-              // 共有をキャンセルした場合は何もしない
-              console.log("印刷がキャンセルされました");
-            });
-        } else {
-          alert("お使いの環境では共有機能がサポートされていません。");
-        }
+        // 2. RawBTにデータを送信する（★ 正しいアプリID「ru.a2012.rawbtprinter」に修正しました）
+        const base64Data = btoa(unescape(encodeURIComponent(html)));
+        const intentUrl =
+          "intent:data:text/html;base64," +
+          base64Data +
+          "#Intent;scheme=rawbt;package=ru.a2012.rawbtprinter;end;";
+
+        const link = document.createElement("a");
+        link.href = intentUrl;
+        link.target = "_top";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // 3. 印刷後、自動的に売上を確定して画面をリセット
+        autoCommitOrder();
+        updateDisplay();
+        setQty(1);
       }
 
       function pressKey(key) {
