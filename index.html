@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pan pequeño レジ PWA - 導線最適化</title>
+    <title>pan pequeño レジ PWA - メニュー更新</title>
     <link rel="manifest" href="manifest.json" />
     <style>
       /* 普段の画面用（印刷エリアは隠しておく） */
@@ -112,7 +112,6 @@
           cursor: pointer;
         }
 
-        /* ★ お釣りの下に配置するボタンのレイアウト設定を追加 */
         .action-buttons {
           display: flex;
           gap: 10px;
@@ -385,7 +384,7 @@
     <h1>🥖 pan pequeño (ぺけぱん) レジ 🥐</h1>
 
     <div class="container">
-      <!-- 左側：パンのボタン・操作エリア（元に戻しました） -->
+      <!-- 左側：パンのボタン・操作エリア -->
       <div class="menu-wrapper">
         <div class="qty-panel">
           <div
@@ -418,7 +417,6 @@
 
         <div class="control-panel">
           <div class="main-controls">
-            <!-- レシート・確定ボタンはお引越ししたので、ここは「一つ戻る」だけにします -->
             <button class="undo-btn" onclick="undoItem()">一つ戻る</button>
           </div>
           <button class="report-btn" onclick="showReport()">
@@ -427,7 +425,7 @@
         </div>
       </div>
 
-      <!-- 右側：会計・テンキーエリア（元に戻しました） -->
+      <!-- 右側：会計・テンキーエリア -->
       <div class="receipt-container">
         <div class="receipt-left">
           <h3 style="margin: 0 0 10px 0; font-size: 18px">注文内容</h3>
@@ -470,7 +468,6 @@
             お釣り: <span id="change">0</span>円
           </div>
 
-          <!-- ★ ここに「レシート」と「会計確定」のボタンを新しく配置しました！ -->
           <div class="action-buttons">
             <button class="print-btn" onclick="printReceipt()">
               🧾 レシート
@@ -524,6 +521,7 @@
         navigator.serviceWorker.register("./sw.js");
       }
 
+      // ★ ここが商品のリストです。「コーンマヨ」を消して「ブドウ」を追加しました。
       const products = [
         { name: "全粒粉", price: 1400 },
         { name: "全粒粉 1/2", price: 700 },
@@ -531,12 +529,12 @@
         { name: "自家製酵母", price: 1200 },
         { name: "自家製酵母 1/2", price: 600 },
         { name: "山食", price: 600 },
+        { name: "ブドウ", price: 850 }, // ★ 新しい商品
         { name: "クロワッサン", price: 280 },
         { name: "スコーン", price: 250 },
         { name: "うずまき", price: 350 },
         { name: "アーモンドクリーム", price: 400 },
         { name: "ホワイトソースパン", price: 450 },
-        { name: "コーンマヨ", price: 380 },
       ];
 
       let total = 0;
